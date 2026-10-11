@@ -418,7 +418,7 @@ accepted.
 |---|---|---|
 | 09/28 | Liu, Ethan | [topic] |
 | 09/30 | Noe, Amanda | Accessing U.S. Census Data |
-| 10/05 | Anikeev, Katerina | [topic] |
+| 10/05 | Anikeev, Katerina | Visualizing Spatial Data |
 | 10/07 | Chervonny, Erik | Grammar of Graphics (ggplot) |
 | 10/12 | Mansur, Mahiba | Decision Trees |
 | 10/14 | Ong, Enrico | Data Manipulation with Pandas |
