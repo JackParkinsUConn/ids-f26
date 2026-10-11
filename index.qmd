@@ -427,6 +427,7 @@ accepted.
 | 10/26 | Fontana, Adam | K-Means Clustering |
 | 10/28 | Wang, Chaoyang | Neural Network |
 | 10/28 | Bucco, Sadie | Random Forests |
+| 11/02 | -- | No class in exchange of midterm-project time |
 | 11/04 | Tria, Nicholas | Naive Bayes |
 | 11/04 | Parkins, Jack | [topic] |
 | 11/09 | Chok, Isaac | [topic] |
