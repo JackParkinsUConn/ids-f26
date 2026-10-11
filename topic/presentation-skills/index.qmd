@@ -11,7 +11,7 @@ format:
     theme: default
     incremental: false
 jupyter: python3
-bibliography: ../../references.bib
+bibliography: references.bib
 ---
 
 ## A deliberately bad presentation
