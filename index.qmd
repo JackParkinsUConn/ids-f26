@@ -422,12 +422,12 @@ accepted.
 | 10/07 | Chervonny, Erik | Grammar of Graphics (ggplot) |
 | 10/12 | Mansur, Mahiba | Decision Trees |
 | 10/14 | Ong, Enrico | Data Manipulation with Pandas |
-| 10/19 | — | Midterm-project work; no topic presentations |
-| 10/21 | — | Midterm-project work; no topic presentations |
+| 10/19 | — | Midterm-project week; no topic presentations |
+| 10/21 | — | Midterm-project week; no topic presentations |
 | 10/26 | Fontana, Adam | K-Means Clustering |
 | 10/28 | Wang, Chaoyang | Neural Network |
-| 11/02 | Bucco, Sadie | Random Forests |
-| 11/04 | Tria, Nicholas | [topic] |
+| 10/28 | Bucco, Sadie | Random Forests |
+| 11/04 | Tria, Nicholas | Naive Bayes |
 | 11/04 | Parkins, Jack | [topic] |
 | 11/09 | Chok, Isaac | [topic] |
 | 11/09 | Horan, Elizabeth | [topic] |
