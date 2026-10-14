@@ -23,3 +23,10 @@ and claims that are proportionate to the evidence.
 
 This example demonstrates a focused explanation, a reproducible figure, and
 careful interpretation of association and causation.
+
+**Topic presentation:**
+[Data manipulation with pandas](../topic/ong-pandas/)
+
+This presentation uses FiveThirtyEight's college majors data to show four
+pandas verbs: select, filter, create, and group. It ends by checking how many
+rows each summary used and what the result does not show.
