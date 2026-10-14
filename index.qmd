@@ -431,7 +431,7 @@ accepted.
 | 11/04 | Tria, Nicholas | Naive Bayes |
 | 11/04 | Parkins, Jack | LLM Agents |
 | 11/09 | Chok, Isaac | [topic] |
-| 11/09 | Horan, Elizabeth | [topic] |
+| 11/09 | Horan, Elizabeth | Support vector machines |
 | 11/11 | Distefano, Cristian | [topic] |
 | 11/11 | Nair, Pardhip | [topic] |
 | 11/11 | Morissette, Carter | [topic] |
