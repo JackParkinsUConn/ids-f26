@@ -235,8 +235,9 @@ or include private information.
 
 ### Midterm
 
-The midterm format, dates, and deliverables will be added after they are
-finalized.
+The [midterm project](midterm-project.qmd) uses NYC 311 honking requests to
+study whether congestion pricing changed honking request counts in the
+Congestion Relief Zone. Submit completed work through Classroom 50.
 
 ### Final Project
 
