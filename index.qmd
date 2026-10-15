@@ -146,6 +146,9 @@ last name and use a nested Markdown list, as in the instructor's example:
   - Share experience completing real-world data-science projects.
   - Help students develop reproducible and collaborative working habits.
 - Anikeev, Katerina
+  - Learn how to better use my computer and navigate work through the command line
+  - Practice skills useful for research and Data Analysis in Political Science
+  - Practice my existing skills and learn how to better code in Python.
 - Bucco, Sadie
   - Become proficient using GitHub and git commands
   - Work on writing code that is clear and reproducible
