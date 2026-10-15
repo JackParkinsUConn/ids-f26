@@ -1,0 +1,445 @@
+---
+title: "Accessing US Census Data"
+author: Amanda Noe
+bibliography: references.bib
+format:
+  revealjs:
+    theme: default
+    smaller: true
+    slide-number: true
+---
+
+## My Background
+
+My name is Amanda Noe and I'm a Junior Statistical Data Science and Political 
+Science double major. I am also pursuing a Math minor.
+
+I chose to present on this topic because I'm interested in political research 
+and thus I anticipate this will be applicable.
+
+## Introduction to Census Data
+
+US Census Data provides vital and extensive insights by providing widely used demographic and economic data about the United States. [@census-what-we-do]
+
+# Why US Census Data Matters
+
+## Insights provided by Census data
+- Population counts across states and local areas
+- Demographic information: Age and aging trend, household structures, 
+migration patterns
+- Economic Information: poverty measures, income levels, economic activity
+- Housing and Infrastructure: housing prices, housing occupancy/vacancies,
+heating sources
+
+## Uses for these insights
+
+- **Politics:** redistricting, informing policy
+- **Business:** Choosing location, understanding customer patterns
+- **Community services:** Information for planning community services such as where
+to provide services for the elderly and whether to build new roads/schools
+- **Government:** Informs policy decisions concerning neighborhood improvements, 
+public health, education, transportation and more.
+
+## Main Datasets provided by the U.S. Census Bureau
+
+There are many data sets provided by the U.S. Census Bureau but the main ones are as follows [@census-api-datasets]:
+
+- **Decennial Census:** Counts every resident every 10 years to determine 
+political representation
+- **American Community Survery:** Gathers annual and monthly social, economic, 
+and housing data for local communities
+- **TIGER/Line Geodatabases:** databases with information about spacial deliniation on the national and state level [@census-tiger-shapefiles]
+
+# Accessing Census Data
+
+## Main ways to get Census Data
+
+There are a couple options on how to download U.S. Census Data. These are the 
+main methods:
+
+- *data.census.gov:* you can download many tables manually online, TIGER files 
+are also here
+- *Census API:* preferred method because it allows for direct programmic 
+access, makes this ideal for programmers and researchers. [@census-api-guide]
+- *QuickFacts:* streamlined tool that provides frequently requested statistics 
+for states, counties, cities, and towns.
+- *Python and R Packages:* data is occasionally available in this way.
+
+## Why Use the API
+
+As previously stated, the API is more streamlined and allows for importing 
+data using the command line, which is ideal for programmers. [@patton-api-basics]
+
+Using the API ultimately makes your code:
+
+- more reproducable
+- more efficient 
+- effective for larger workflows
+
+## How to Use the API
+
+1. Choose the U.S. census data set (i.e. the ACS) [@census-available-apis]
+2. Choose which variables you need and find the alphanumeric code for 
+them
+3. Request an API key
+4. Build your API URL (example URL: 
+http://api.census.gov/data/2023/acs/acs5?get=NAME,B01003_001E&
+for=state:*&key=127522bb146effe5374s61fd4279c26a4571503)
+(example key, not usable) [@census-api-video]
+5. Request the data: use requests package 
+(`response = requests.get(url)`) [@requests-pypi]
+6. Create a data frame to use the data
+
+## How to keep API key hidden
+- While an API key is not as sensitive as something like a password, you want 
+to avoid other people using your key for their requests as  your key can be 
+revoked if its misused
+- One method is to use a `.env` file to store your key as an environmental 
+variable. (make sure `.env` is ignored by git).
+- In your `.env` file, save your key as a variable and then load it into your 
+python environment.
+- Example of what your `.env` file could look like (fake key):
+```text
+CENSUS_API_KEY=127522bb146effe5374s61fd4279c26a4571503 
+```
+- When collaborating, collaborators need to create their own `.env` file with 
+their own key, making sure the file is not committed. As long as they do this 
+and follow the syntax, the process is reproducable.
+
+## How to keep API key hidden (cont.)
+
+```{python}
+#| echo: true
+import os
+from dotenv import load_dotenv
+
+# Find the repository-level .env file without replacing existing variables.
+load_dotenv()
+api_key = os.getenv("CENSUS_API_KEY")
+if not api_key:
+    raise ValueError("Add CENSUS_API_KEY to your local .env file.")
+```
+
+- In your code, your API URL will look like 
+`url = f"https://api.census.gov/data/2023/acs/acs5?`
+`get=NAME,B01003_001E&for=state:*&key={api_key}"`
+
+## Example 1: Population By State Data Frame
+```{python}
+#| echo: true
+# Importing necessary packages
+import requests
+import pandas as pd
+
+# API URL 
+url = f"https://api.census.gov/data/2023/acs/acs5?get=NAME,B01003_001E&for=state:*&key={api_key}"
+
+response = requests.get(url)
+data = response.json()
+```
+
+## Converting the data into a data frame
+
+```{python}
+#| echo: true
+# making data frame
+df = pd.DataFrame(data[1:], columns=data[0])
+
+# Making population numbers into integers
+df["B01003_001E"] = df["B01003_001E"].astype(int)
+
+# Making columnn names more readable
+df = df.rename(columns={
+  "NAME" : "State",
+  "B01003_001E" : "Population"
+})
+
+# Removing the non-states included
+df = df[~df["State"].isin(["Puerto Rico", "District of Columbia"])]
+
+# Keeping only state names and population numbers and 10 entries
+df = df[["State", "Population"]].head(10)
+```
+
+## Data Frame
+```{python}
+#| echo: false
+#| output: true
+
+df
+```
+
+# Visual
+
+## Example 1: Bar Graph for comparing Income across Brooklyn Area Codes
+
+```{python}
+#| echo: true
+# importing necessary packaged
+import matplotlib.pyplot as plt
+import requests
+import pandas as pd
+
+# API URL
+url = f"https://api.census.gov/data/2024/acs/acs5?get=NAME,B19013_001E&for=zip%20code%20tabulation%20area:*&key={api_key}"
+
+response = requests.get(url)
+data = response.json()
+```
+
+## Data Frame
+```{python}
+#| echo: true
+# making data frame
+df = pd.DataFrame(data)
+
+# Make the first row the column names
+df.columns = df.iloc[0]
+df = df.iloc[1:].reset_index(drop=True)
+
+# Rename columns
+df = df.rename(columns={
+    "zip code tabulation area": "zip_code",
+    "B19013_001E": "median_income"
+})
+
+# Removing "NAME" col
+df = df.drop(columns=["NAME"])
+
+# Setting data types
+df["zip_code"] = df["zip_code"].astype(str)
+
+df["median_income"] = df["median_income"].astype(int)
+```
+
+## Data Frame Cont.
+```{python}
+#| echo: true
+# List of Brooklyn, NYC area codes
+brooklyn_zips = [
+    "11201", "11203", "11204", "11205", "11206",
+    "11207", "11208", "11209", "11210", "11211",
+    "11212", "11213", "11214", "11215", "11216",
+    "11217", "11218", "11219", "11220", "11221",
+    "11222", "11223", "11224", "11225", "11226",
+    "11228", "11229", "11230", "11231", "11232",
+    "11233", "11234", "11235", "11236", "11237",
+    "11238", "11239", "11249"
+]
+
+# Limiting data frame to brooklyn
+brooklyn_income = df[
+    df["zip_code"].isin(brooklyn_zips)
+]
+
+# Sorting the data for a more clear graph
+brooklyn_income = brooklyn_income.sort_values(
+    "median_income"
+)
+
+# Resetting index
+brooklyn_income = brooklyn_income.reset_index(drop=True)
+```
+
+## Data Frame
+```{python}
+#| echo: false
+#| output: true
+brooklyn_income.head(10)
+```
+
+## Bar Graph
+```{python}
+#| echo: false
+#| fig-format: svg
+#| output: true
+brooklyn_income.plot(
+    x="zip_code",
+    y="median_income",
+    kind="barh",
+    figsize=(10,6),
+    legend=False
+)
+
+plt.xlabel("Median Household Income ($)")
+plt.ylabel("Brooklyn ZIP Code")
+plt.title("Median Household Income by Brooklyn ZIP Code")
+plt.tight_layout()
+plt.show()
+```
+
+## Example 2: Scatter Plot for Comparing Education and Income by State
+
+```{python}
+#| echo: true
+import matplotlib.pyplot as plt
+import requests
+import pandas as pd
+
+# API URL
+url = f"https://api.census.gov/data/2024/acs/acs5?get=NAME,B19013_001E,B15003_001E,B15003_022E&for=state:*&key={api_key}"
+
+response = requests.get(url)
+data = response.json()
+
+```
+
+## Data
+```{python}
+#| echo: true
+# Make data frame
+df = pd.DataFrame(data)
+
+# Make the first row the column names
+df.columns = df.iloc[0]
+df = df.iloc[1:].reset_index(drop=True)
+
+df = df.rename(columns={
+    "NAME": "State",
+    "B19013_001E": "Median_Income",
+    "B15003_001E": "Age_25_Plus",
+    "B15003_022E": "Bachelors"
+})
+
+# changing data type
+df["Median_Income"] = df["Median_Income"].astype(int)
+df["Age_25_Plus"] = df["Age_25_Plus"].astype(int)
+df["Bachelors"] = df["Bachelors"].astype(int)
+
+# Making column w/ the percent of state residents with bachlors
+df["Bachelors_Percent"] = (
+    df["Bachelors"] / df["Age_25_Plus"] * 100
+)
+
+# dropping non-states
+df = df[~df["State"].isin(["Puerto Rico", "District of Columbia"])]
+```
+
+## Scatter Plot
+```{python}
+#| echo: false
+#| fig-format: svg
+#| output: true
+# Making scatter plot comparing education and income
+plt.scatter(df["Bachelors_Percent"], df["Median_Income"])
+
+# labeling 
+plt.xlabel("Percent of 25+ Population with Bachelor's Degree")
+plt.ylabel("Median Household Income ($)")
+plt.title("Education and Median Household Income by State")
+
+plt.show()
+```
+
+# Spatial Census Data
+
+## Importance of Spacial Census Data
+
+Considering spacial census data is helpful for many things including:
+
+- Making choropleth maps
+- Regional comparisons 
+- Policy analysis relative to location
+
+Spacial census data is powerful because you can consider many different scales,
+from the national scale to census blocks, which can be as small as a city block
+in urban areas.
+
+# Spacial Example
+
+## Choropleth Map of Internet Access
+
+```{python}
+#| echo: true 
+import matplotlib.pyplot as plt
+import geopandas as gpd
+import requests
+import pandas as pd
+
+url = f"https://api.census.gov/data/2024/acs/acs5/subject?get=NAME,S2801_C02_012E&for=state:*&key={api_key}"
+
+response = requests.get(url)
+data = response.json()
+```
+
+## Data Frame
+```{python}
+#| echo: true 
+# Making DataFrame
+df = pd.DataFrame(data[1:], columns=data[0])
+
+# Convert internet access percentage to numeric
+df["Internet Access"] = df["S2801_C02_012E"].astype(float)
+```
+
+## Spacial Data
+```{python}
+#| echo: true
+# Downloading state boundaries from TIGER
+states = gpd.read_file(
+    "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_state_500k.zip"
+)
+
+# Match Census state codes
+states["STATEFP"] = states["STATEFP"].astype(str)
+
+df["state"] = df["state"].astype(str).str.zfill(2)
+
+# Merge the Census data with the map
+map_data = states.merge(
+    df,
+    left_on="STATEFP",
+    right_on="state"
+)
+
+# Remove Alaska, Hawaii, and Puerto Rico for cleaner map
+map_data = map_data[
+    ~map_data["STUSPS"].isin(["AK", "HI", "PR"])
+]
+```
+
+## Choropleth Map
+```{python}
+#| echo: false
+#| fig-format: svg
+#| output: true
+# Make the choropleth map
+fig, ax = plt.subplots(figsize=(12, 8))
+
+map_data.plot(
+    column="Internet Access",
+    cmap="Blues",
+    legend=True,
+    ax=ax,
+    edgecolor="black",
+    linewidth=0.5
+)
+
+ax.set_title("Percentage of Households with Internet Access by State")
+ax.axis("off")
+plt.show()
+```
+
+## Conclusion
+
+The U.S. Census Bureau provides a wide range of demographic, economic, and 
+geographic data that can be used in numerous fields to understand 
+communities and populations.
+
+Using the Census API is the best option for accessing Census data for 
+programmers. Accessing data using the API allows programmers to:
+
+- Create dataframes
+- Create statistical visualizations
+- Create maps with statistical insights
+
+The Census API makes large amounts of public data accessible, reproducible, 
+and useful for data-driven research.
+
+## References {.smaller}
+<style>
+.reveal #refs {
+  font-size: 0.75em;
+  line-height: 1.1;
+}
+</style>
