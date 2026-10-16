@@ -42,9 +42,44 @@ that Quarto files render successfully. Do not commit generated output, cache
 files, credentials, sensitive student information, or copied material without
 proper attribution.
 
-Activate the course Python environment before rendering. The Makefile assumes
-that the current shell is already inside the intended environment; it does not
-create, select, or modify virtual environments.
+## Shared Python Environment
+
+Use the same Python 3.12 environment for `ids-book`, `ids-f26`, and coursework.
+Follow the
+[book setup instructions](https://statds.github.io/ids-book/#building-the-book)
+to create and activate it once. Do not create another environment or install
+packages inside `ids-f26`.
+
+Clone `ids-book` and `ids-f26` side by side:
+
+```text
+course-work/
+├── ids-book/
+└── ids-f26/
+```
+
+The book's `requirements.txt` is the single source for course package
+versions. This repository's `requirements.txt` contains only an include of
+`../ids-book/requirements.txt`; it has no separate package pins. With the
+shared environment active, install or refresh dependencies from `ids-f26`
+using:
+
+```sh
+make -C ../ids-book install
+```
+
+If your checkouts are not side by side, run `make install` from the actual
+`ids-book` directory instead. The environment may live anywhere; activate
+that same environment before rendering either repository.
+
+Request instructor approval for new dependencies and propose approved
+changes in `ids-book/requirements.txt`. Do not add package pins here or
+overwrite this repository's include with `pip freeze`.
+
+The Makefile assumes that the current shell is already inside the intended
+environment; it does not create, select, or modify virtual environments.
+
+## Rendering
 
 Render one presentation while developing it:
 

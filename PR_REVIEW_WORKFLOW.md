@@ -58,6 +58,10 @@ rather than duplicating substantial instructor-authored exposition.
 
 ## 3. Render when useful
 
+Use the shared environment and dependency policy in
+[README.md](README.md#shared-python-environment). New dependencies belong in
+`ids-book/requirements.txt` and require instructor approval.
+
 Activate the course Python environment (Python 3.12) before rendering. Set
 `ENVIRONMENT_DIRECTORY` to the existing environment's directory:
 

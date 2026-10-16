@@ -1,7 +1,3 @@
-jupyter==1.1.1
-matplotlib==3.11.1
-pandas==3.0.5
-python-dotenv==1.2.4
-requests==2.32.5
-geopandas==1.1.3
-statsmodels==0.14.6
+# Shared course dependencies; clone ids-book beside ids-f26.
+# See README.md for setup and other checkout layouts.
+-r ../ids-book/requirements.txt

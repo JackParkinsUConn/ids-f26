@@ -189,6 +189,14 @@ Editorial acceptance and grading should remain conceptually separate.
 
 ## Reproducibility
 
+Use one Python 3.12 environment for the book, semester notes, and coursework.
+`ids-book/requirements.txt` is the single source for package versions. The
+semester requirements file includes `../ids-book/requirements.txt`, assuming
+side-by-side checkouts; for other layouts, install from the book directory.
+Do not create another environment here or replace the include with a frozen
+package list. Propose new dependencies in the book repository for instructor
+approval. See `README.md` for the setup workflow.
+
 Python examples should be runnable and minimal.
 
 Prefer:

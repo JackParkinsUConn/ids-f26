@@ -136,6 +136,13 @@ format. Do not add a deck to a chapter that is unrelated to its subject.
 
 ### 5. Render and inspect the deck
 
+Use the shared Python 3.12 environment described in
+[README.md](README.md#shared-python-environment). The book's
+`requirements.txt` is the single source for dependencies; the semester file
+only includes it. Request instructor approval for new packages and propose
+them in `ids-book/requirements.txt`. Do not create a separate environment
+for this repository.
+
 Activate the course Python environment, then render only the presentation
 while developing it:
 

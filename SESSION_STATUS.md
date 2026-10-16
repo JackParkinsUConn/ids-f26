@@ -28,15 +28,11 @@ computer; do not expect that link or a Python environment to transfer.
 
 ## Rendering and review
 
-Use Python 3.12 and an environment with `requirements.txt` installed. The
-Makefile expects the environment to be active and does not create one. A new
-checkout can set one up with:
-
-```sh
-python3.12 -m venv .ids
-source .ids/bin/activate
-python -m pip install -r requirements.txt
-```
+Use the same Python 3.12 environment as `ids-book` and coursework. Follow
+the current README for setup; do not create another environment here. The
+Makefile expects the shared environment to be active and does not create
+one. Install or refresh dependencies by running `make install` from the
+book checkout with that environment active.
 
 Render a changed presentation with
 `make render-one FILE=topic/<name>/index.qmd`; run `make render` when the
@@ -61,3 +57,14 @@ part of `main`. Review current GitHub state before drawing conclusions about
 any other PR. The instructor plans to revisit whether classification should
 be a separate chapter in `ids-book`; no `ids-f26` restructure is needed for
 that discussion.
+
+## Latest session update (2026-10-16)
+
+The single source for dependencies is now `ids-book/requirements.txt`,
+including `python-dotenv` for the Census presentation. The semester file
+contains `-r ../ids-book/requirements.txt` and assumes side-by-side checkouts.
+For other layouts, install from the actual book directory. Use one shared
+environment and propose new dependencies in the book repository for
+instructor approval. The setup and contribution documentation reflect this
+policy. The local semester checkout is nested, so use `make install` from
+`/home/junyan/work/teaching/ids-book` to refresh this machine's environment.

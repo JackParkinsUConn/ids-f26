@@ -69,6 +69,12 @@ git clone https://github.com/statds/ids-f26.git
 cd ids-f26
 ```
 
+The book's `requirements.txt` is the single source for course package versions.
+This repository's `requirements.txt` includes `../ids-book/requirements.txt`
+for the side-by-side checkout layout above. Follow the
+[book setup instructions](https://statds.github.io/ids-book/#building-the-book)
+when creating the shared Python 3.12 environment for the first time.
+
 Use the course Python environment that you already chose while working through
 the instructor book. Do **not** create another virtual environment or install
 packages inside `ids-f26`. From the `ids-f26` repository, set
@@ -83,6 +89,12 @@ source "$ENVIRONMENT_DIRECTORY/bin/activate"
 # Windows with Git Bash
 source "$ENVIRONMENT_DIRECTORY/Scripts/activate"
 ```
+
+To refresh packages after an approved dependency change, activate that
+environment and run `make install` from `ids-book`. If your checkouts are
+not side by side, use the actual book directory; the relative include above
+assumes the documented layout. Propose new dependencies to the instructor
+for inclusion in the book's requirements rather than adding package pins here.
 
 Confirm that the selected interpreter is the course environment before
 rendering:
@@ -510,7 +522,7 @@ Before requesting review, check that the contribution:
 - uses BibTeX for scholarly references;
 - avoids unnecessary external files and large data files;
 - uses only images that may legally be redistributed;
-- records any new Python dependencies in the environment specification; and
+- requests approval for new Python dependencies in `ids-book/requirements.txt`;
 - renders successfully on the contributor's computer.
 
 Pull requests contain source files, not rendered output. After a pull request
