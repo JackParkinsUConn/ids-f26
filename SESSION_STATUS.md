@@ -13,14 +13,19 @@ instructor-authored, semester-independent book lives in the separate
 presentations under `final/`, and catalog entries under `chapters/`. Preserve
 student authorship during review and keep private graded work out of this repo.
 
-## Current local state (2026-10-12)
+## Current local state (2026-10-16)
 
-The checkout is clean on `main` at `0be979e`, matching its local
-`origin/main` tracking ref. The local branches
-`topic/amanda-noe-census-data` and `topic/horan-elizabeth-geopandas` remain
-from reviews; their current pull-request states were not checked for this
-handoff. Use `gh pr list --state open` and `gh pr view <number>` for current
-GitHub PR information. A Git fetch alone cannot list pull requests.
+The checkout is on `main` at `55a295f`, one commit ahead of the local
+`origin/main` tracking ref. This count was checked without fetching GitHub.
+The tracked worktree was clean before this handoff update. The only local
+branches are `main` and `gh-pages`; earlier review branches are gone. Use
+`gh pr list --state open` and `gh pr view <number>` for current GitHub PR
+information. A Git fetch alone cannot list pull requests.
+
+Untracked local material remains, including `.ids`, midterm drafts, instructor
+solutions, data documentation, and generated figure directories. Preserve these
+files and do not stage them during routine maintenance. The instructor has
+deferred further midterm work. Graded submissions belong in Classroom 50.
 
 The linked `ids-f26` path inside the book checkout is an untracked,
 machine-specific symlink. Clone this repository separately on the other
@@ -68,3 +73,26 @@ environment and propose new dependencies in the book repository for
 instructor approval. The setup and contribution documentation reflect this
 policy. The local semester checkout is nested, so use `make install` from
 `/home/junyan/work/teaching/ids-book` to refresh this machine's environment.
+
+### Accepted presentations and contributor credit
+
+Amanda Noe's Census presentation was merged in `df241f5` (PR #36). Commit
+`46fd421` links it from `chapters/data-acquisition.qmd`, adds Amanda Noe and
+Enrico Ong to the book's author metadata, and identifies Enrico beside his
+pandas presentation link. Student contributions belong in these collaborative
+notes, with catalog entries in the appropriate `chapters/` file. Credit each
+accepted presentation's authors in its catalog entry and update the book
+metadata as contributors are added.
+
+### Completed dependency cleanup
+
+Commit `55a295f` replaces the duplicate dependency pins with the book include
+and updates the README, introduction, contribution guide, review workflow,
+Codex instructions, and this handoff. The corresponding book commit is
+`d288fb2`, which adds `python-dotenv` and documents the shared environment.
+Neither dependency commit was pushed in this session.
+
+Diff checks passed. This cleanup did not install packages or render the site.
+The Census presentation rendered successfully during the earlier PR review;
+that result predates the contributor's later merged revisions. Use the shared
+environment for the next render. This handoff update is not itself committed.
