@@ -9,7 +9,10 @@ book:
   title: "Introduction to Data Science"
   subtitle: "STAT 3255/5255 @ UConn, Fall 2026"
   author:
-    - name: "[Jun Yan](https://statcomp.org) and Students in Fall 2026"
+    - name: Jun Yan
+      url: https://statcomp.org
+    - name: Amanda Noe
+    - name: Enrico Ong
   date: today
   chapters:
     - index.qmd

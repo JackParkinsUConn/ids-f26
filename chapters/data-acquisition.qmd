@@ -9,3 +9,10 @@ and programmatically accessing data.
 This example shows how to separate a documented data request from the analysis
 and how to avoid exposing credentials or depending unnecessarily on a live
 service.
+
+**Topic presentation:**
+[Accessing US Census Data](../topic/amanda-noe-census-data/) by Amanda Noe
+
+This presentation introduces Census data sources and demonstrates using the
+Census API in Python, loading an API key from a local `.env` file, and
+converting returned data into pandas data frames for plots and maps.

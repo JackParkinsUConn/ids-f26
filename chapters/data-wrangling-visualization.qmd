@@ -25,7 +25,7 @@ This example demonstrates a focused explanation, a reproducible figure, and
 careful interpretation of association and causation.
 
 **Topic presentation:**
-[Data manipulation with pandas](../topic/ong-pandas/)
+[Data manipulation with pandas](../topic/ong-pandas/) by Enrico Ong
 
 This presentation uses FiveThirtyEight's college majors data to show four
 pandas verbs: select, filter, create, and group. It ends by checking how many
