@@ -475,7 +475,7 @@ chapter collects links to the rendered decks.
 | 12/02 | Mansur, Mahiba | [project] |
 | 12/02 | Ong, Enrico | [project] |
 | 12/02 | Chok, Isaac | [project] |
-| 12/02 | Wang, Chaoyang | [project] |
+| 12/02 |  | [project] |
 | 12/07 | Bucco, Sadie | [project] |
 | 12/07 | Tria, Nicholas | [project] |
 | 12/07 | Parkins, Jack | [project] |
@@ -484,12 +484,12 @@ chapter collects links to the rendered decks.
 | 12/09 | Distefano, Cristian | [project] |
 | 12/09 | Nair, Pardhip | [project] |
 | 12/09 | Morissette, Carter | [project] |
-| [exam-period date] | Maras, Ruveyda | [project] |
-| [exam-period date] | Wang, Leo | [project] |
-| [exam-period date] | Choudhury, Ruhama | [project] |
-| [exam-period date] | Hartman, Mikaela | [project] |
-| [exam-period date] | Kiani, Ismail | [project] |
-| [exam-period date] | Kelly, Daniel | [project] |
+| 12/19 (8:00-10:00) | Maras, Ruveyda | [project] |
+| 12/19 (8:00-10:00) | Wang, Leo | [project] |
+| 12/19 (8:00-10:00) | Choudhury, Ruhama | [project] |
+| 12/19 (8:00-10:00) | Hartman, Mikaela | [project] |
+| 12/19 (8:00-10:00) | Kiani, Ismail | [project] |
+| 12/19 (8:00-10:00) | Kelly, Daniel | [project] |
 
 ## Contributing to the Collaborative Notes
 
