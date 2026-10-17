@@ -30,16 +30,6 @@ the toll caused a change. Weather, wildfire smoke, traffic, monitor operations,
 and other events can affect PM2.5 at the same time. Your report must separate
 the model's estimated association from a causal conclusion.
 
-Use the same virtual environment of the ids-book project to ensure
-reproducibility of your report on my computer.
-
-You may use AI tools to brainstorm, explain data-science concepts and
-workflows, consult programming documentation, and suggest or debug code. You
-are responsible for running, checking, and understanding AI-suggested code;
-conducting the analysis; and writing your own interpretations and conclusions.
-Do not ask an AI tool to complete an exercise or produce your report. Disclose
-AI assistance using the statement in the report template.
-
 Two ZIP files are provided, covering June 1, 2023, through
 August 31, 2026: [NYCCAS data](data/nyccas.zip) and
 [AirNow data](data/airnow.zip). Each ZIP contains one hourly CSV file. Keep
@@ -73,6 +63,16 @@ removed after sensor problems. Cite both data sources in
 your report.
 
 ## Exercises {.unnumbered}
+
+Use the same virtual environment of the ids-book project to ensure
+reproducibility of your report on my computer.
+
+You may use AI tools to brainstorm, explain data-science concepts and
+workflows, consult programming documentation, and suggest or debug code. You
+are responsible for running, checking, and understanding AI-suggested code;
+conducting the analysis; and writing your own interpretations and conclusions.
+Do not ask an AI tool to complete an exercise or produce your report. Disclose
+AI assistance using the statement in the report template.
 
 ::: {#exr-pm25-clean}
 Inspect and clean the hourly source files.
