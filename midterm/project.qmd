@@ -37,6 +37,13 @@ Include executable Python code that reads the supplied data from a local
 `data/` folder, documents each cleaning choice, and produces the tables and
 figures you discuss.
 
+You may use AI tools to brainstorm, explain data-science concepts and
+workflows, consult programming documentation, and suggest or debug code. You
+are responsible for running, checking, and understanding AI-suggested code;
+conducting the analysis; and writing your own interpretations and conclusions.
+Do not ask an AI tool to complete an exercise or produce your report. Disclose
+AI assistance using the statement in the report template.
+
 Two ZIP files are provided, covering June 1, 2023, through
 August 31, 2026: [NYCCAS data](data/nyccas.zip) and
 [AirNow data](data/airnow.zip). Each ZIP contains one hourly CSV file. Keep
