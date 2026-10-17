@@ -74,53 +74,64 @@ your report.
 ::: {#exr-pm25-clean}
 Inspect and clean the hourly source files.
 
-a. Describe the observational unit, time field and time zone, monitor key,
-   PM2.5 value field, and units in each file.
-b. Standardize the needed column names and parse timestamps as UTC. Check
-   null values, duplicate monitor-hour records, and gaps between each
-   monitor's first and last observations. Report missing hours by monitor
-   and identify one month with a notable gap. Distinguish absent hours from
-   null cells and time before a monitor began reporting.
-c. Investigate unusual AirNow values, including negative codes. Identify
-   codes that cannot be valid concentrations, document the exclusion rule,
-   and keep the original files unchanged.
-d. Apply the paper's strict range, $0 < PM_{2.5} < 25.5$ µg/m³, after
-   removing invalid codes. Report retained and excluded counts. Explain
-   which valid zeros and high readings this rule removes and why some high
-   readings could be real events.
+a. State the observational unit in each file and identify the field that
+   distinguishes monitors.
+b. Identify each file's timestamp and concentration fields, state the time
+   zone and units, and explain what time an hourly timestamp represents.
+c. Standardize the needed column names and parse timestamps as UTC. Report
+   null-cell and duplicate monitor-hour counts. For each monitor, report the
+   absent-hour count within its first-to-last observation window. Identify
+   the monitor-month with the most absent hours, and distinguish absent
+   hours from null cells and time before a monitor began reporting.
+d. Inspect unusual AirNow values, including negative codes. Identify the
+   invalid code or codes, report how many rows they affect, and explain the
+   exclusion rule. Apply the rule to a working copy and leave the source
+   files unchanged.
+e. After excluding invalid codes, apply the paper's strict range,
+   $0 < PM_{2.5} < 25.5$ µg/m³. For each source, report eligible, retained,
+   and excluded row counts. Also report how many valid zero and high readings
+   the rule removes, and explain why some high readings could be real events.
 :::
 
 ::: {#exr-pm25-daily}
 Create daily data and merge the sources.
 
-a. Calculate daily maxima separately for each NYCCAS and AirNow monitor.
-   Average the available AirNow monitor maxima for each date and report how
-   many monitors contribute to each background estimate.
-b. Create dates from the UTC timestamps. Show one example hour whose
+a. Create one monitor-day row for each NYCCAS and AirNow monitor with an
+   observation that day. Calculate each row's daily maximum and report the
+   number of monitor-day rows for each source.
+b. Average the available AirNow monitor maxima for each UTC date. Record the
+   number of contributing monitors and report a frequency table of dates by
+   number of contributing monitors.
+c. Create dates from the UTC timestamps. Show one example hour whose
    New York local calendar date differs from its UTC date, and explain why
    the chosen date convention matters for a daily maximum.
-c. Join date-level background estimates to NYCCAS monitor-days. Report row
-   counts before and after the join, validate its cardinality, and explain
-   how dates without background measurements are handled. Do not join the
-   hourly files directly or replace missing measurements with zero.
-d. Create a policy indicator that switches on January 5, 2025, and a variable
-   counting days since that date. Retain January 2025 and explain how the
-   intervention date determines these variables.
+d. Left-join the date-level background estimates to the NYCCAS monitor-day
+   table. Report row counts before and after the join, validate the expected
+   many-to-one join, and explain how dates without background measurements
+   are represented. Do not join the hourly files directly or replace missing
+   measurements with zero.
+e. Create an indicator that switches on January 5, 2025, and an elapsed-days
+   variable that is zero before and on that date. Retain January 2025 and
+   report the indicator and elapsed-days values for January 4, 5, and 6.
 :::
 
 ::: {#exr-pm25-eda}
 Explore and visualize the hourly and daily measurements.
 
-a. Make a faceted plot of CRZ monitor daily maxima by month, with separate
-   weekday panels. Describe one seasonal pattern and one weekday comparison.
-   Explain what the facets make easier to see.
-b. Plot the daily regional background series alongside the CRZ series.
-   Compare the CRZ-minus-background difference before and after the policy
-   date and explain why this raw contrast is descriptive.
-c. Summarize how many AirNow monitors contribute to each daily background
-   estimate and how many CRZ sites contribute over time. Explain why missing
+a. Plot CRZ monitor daily maxima with month on the horizontal axis, daily
+   maximum PM2.5 on the vertical axis, and a separate panel for each weekday.
+b. Describe one seasonal pattern and compare two weekdays within a month,
+   referring to the plot. Explain how the facets help make these patterns
+   visible.
+c. For each UTC date, average the available CRZ monitor daily maxima. Plot
+   this series with the daily AirNow background series. Report the mean
+   CRZ-minus-background difference before and after the policy date and the
+   change in that mean difference. Explain why this raw contrast is
+   descriptive.
+d. Show frequency tables of dates by the number of contributing AirNow
+   monitors and by the number of contributing CRZ sites. Explain why missing
    measurements are not zero-valued measurements.
-d. Plot the daily CRZ-minus-background PM2.5 distributions before and
+e. Plot the daily CRZ-minus-background PM2.5 distributions before and
    after January 5, 2025. Compare their medians and spreads. Use a two-sided
    Mann–Whitney U test to compare the distributions: state the hypotheses,
    report both sample sizes, the test statistic and $p$-value, and interpret
@@ -150,21 +161,29 @@ where $H_t$ marks a high day and $g(X_t)$ contains AirNow background and
 any other covariates. The coefficients $\beta_2$ and $\beta_3$ describe
 the immediate level change and the change in yearly trend, respectively.
 
-a. Calculate the high-day cutoff and indicator. Report high and non-high
-   day counts, the number of dates, and CRZ monitor coverage.
-b. Fit the segmented logistic model. Report and interpret the intervention
+a. Calculate the 75th percentile of the pre-policy CRZ daily means. State
+   the resulting cutoff and define how it classifies each date as high or
+   non-high.
+b. Make a two-way cross-tabulation of high-day status by policy period
+   (before versus after January 5, 2025). Show counts and percentages within
+   each period. Also report the number of dates and summarize CRZ monitor
+   coverage with a frequency table by number of contributing sites.
+c. Fit the segmented logistic model. Report and interpret the intervention
    level-change and trend-change odds ratios with 95% confidence intervals.
    Explain your AirNow background term and any other covariates.
-c. Plot observed high days and fitted probabilities over time. Describe the
-   pre-policy and post-policy patterns and whether the fitted change is an
-   immediate shift, a trend change, or both.
-d. Conclude by answering the research question. Use the residual pattern,
+d. Plot observed high days and fitted probabilities over time. Also plot
+   response residuals (observed indicator minus fitted probability) over
+   time. Describe the pre-policy and post-policy patterns, whether the fitted
+   change is an immediate shift, a trend change, or both, and any visible
+   residual pattern.
+e. Conclude by answering the research question. Use the residual pattern,
    dependence between nearby days, regional background, and possible
    confounding to explain how far the result supports a causal claim.
 :::
 
 **Submission.**
-Organize the report around these four steps. Include the Python code that
+Organize the report around these four steps. The project has 20 subquestions,
+worth 2 points each, for 40 points total. Include the Python code that
 produces every reported result, and explain each cleaning and modeling choice.
 Use ideas from chapters 1–9 of the
 [course book](https://statds.github.io/ids-book/): reproducible projects,
