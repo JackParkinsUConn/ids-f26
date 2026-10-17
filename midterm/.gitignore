@@ -4,3 +4,6 @@
 # Rendered book chapter and supporting files
 *.html
 *_files/
+
+# Keep local extracted CSVs out of the release; publish the ZIPs.
+data/*.csv
