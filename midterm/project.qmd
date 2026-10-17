@@ -30,12 +30,8 @@ the toll caused a change. Weather, wildfire smoke, traffic, monitor operations,
 and other events can affect PM2.5 at the same time. Your report must separate
 the model's estimated association from a causal conclusion.
 
-Use Python for this project. There is no restriction on which Python packages
-you use. A grammar-of-graphics library such as `plotnine` is welcome.
-Document the packages needed to reproduce your report.
-Include executable Python code that reads the supplied data from a local
-`data/` folder, documents each cleaning choice, and produces the tables and
-figures you discuss.
+Use the same virtual environment of the ids-book project to ensure
+reproducibility of your report on my computer.
 
 You may use AI tools to brainstorm, explain data-science concepts and
 workflows, consult programming documentation, and suggest or debug code. You
