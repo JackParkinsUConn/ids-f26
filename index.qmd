@@ -250,9 +250,9 @@ or include private information.
 
 ### Midterm
 
-The [midterm project](midterm-project.qmd) uses NYC 311 honking requests to
-study whether congestion pricing changed honking request counts in the
-Congestion Relief Zone. Submit completed work through Classroom 50.
+The [midterm project](midterm/project.qmd) uses hourly PM2.5 measurements to
+study air quality before and after congestion pricing. Submit completed work
+through Classroom 50.
 
 ### Final Project
 

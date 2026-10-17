@@ -1,0 +1,6 @@
+/.quarto/
+**/*.quarto_ipynb
+
+# Rendered book chapter and supporting files
+*.html
+*_files/
