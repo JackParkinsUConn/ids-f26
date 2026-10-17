@@ -9,7 +9,7 @@ crossref:
 bibliography: references.bib
 ---
 
-# Midterm project: PM2.5 and congestion pricing
+# Midterm Project: PM2.5 and Congestion Pricing
 
 New York City began charging most vehicles entering Manhattan's Congestion
 Relief Zone (CRZ) on January 5, 2025. Did the odds of a high-PM2.5 day at CRZ
@@ -30,14 +30,16 @@ the model's estimated association from a causal conclusion.
 Use Python for this project. There is no restriction on which Python packages
 you use. A grammar-of-graphics library such as `plotnine` is welcome.
 Document the packages needed to reproduce your report.
-Include executable Python code that reads the supplied CSV files from a local
+Include executable Python code that reads the supplied data from a local
 `data/` folder, documents each cleaning choice, and produces the tables and
 figures you discuss.
 
-The instructor will provide two hourly CSV files covering June 1, 2023, through
-August 31, 2026: [NYCCAS data](data/nyccas.csv) and [AirNow data](data/airnow.csv).
-Keep them in a local `data/` folder next to your report. Do not include the raw
-files in your submission.
+The instructor will provide two ZIP files covering June 1, 2023, through
+August 31, 2026: [NYCCAS data](data/nyccas.zip) and
+[AirNow data](data/airnow.zip). Each ZIP contains one hourly CSV file. Keep
+both ZIPs in a local `data/` folder next to your report. You may read the
+CSV files directly from the ZIPs or extract them first. Do not include the
+data files in your submission.
 
 - `nyccas.csv` contains readings from six NYCCAS monitors inside the
   CRZ, with location and site information.
@@ -57,10 +59,11 @@ documentation. Do not treat a missing monitor reading as zero.
 
 The data come from the NYC Community Air Survey (NYCCAS) archive
 [@nyccasarchive] and the AirNow API [@airnowapi]. The AirNow hourly data
-specification documents its GMT timestamp convention [@airnowhourly]. NYCCAS readings are preliminary and its
-historical files can be revised. The accompanying [data README](data/README.md) explains which
-source snapshots contribute to each period and documents NYCCAS correction
-changes and records removed after sensor problems. Cite both data sources in
+specification documents its GMT timestamp convention [@airnowhourly].
+NYCCAS readings are preliminary and its historical files can be revised. The
+accompanying [data README](data/README.md) explains which source snapshots
+contribute to each period and documents NYCCAS correction changes and records
+removed after sensor problems. Cite both data sources in
 your report.
 
 ## Exercises {.unnumbered}
@@ -71,18 +74,17 @@ Inspect and clean the hourly source files.
 a. Describe the observational unit, time field and time zone, monitor key,
    PM2.5 value field, and units in each file.
 b. Standardize the needed column names and parse timestamps as UTC. Check
-   null values in each field, duplicate monitor-hour records, and missing
-   hourly records between each monitor's first and last observations. Summarize
-   valid observations and gaps by monitor and month. Distinguish null cells,
-   absent monitor-hours, and periods before a monitor begins reporting.
+   null values, duplicate monitor-hour records, and gaps between each
+   monitor's first and last observations. Report missing hours by monitor
+   and identify one month with a notable gap. Distinguish absent hours from
+   null cells and time before a monitor began reporting.
 c. Investigate unusual AirNow values, including negative codes. Identify
    codes that cannot be valid concentrations, document the exclusion rule,
    and keep the original files unchanged.
 d. Apply the paper's strict range, $0 < PM_{2.5} < 25.5$ µg/m³, after
-   removing invalid codes. Report retained and excluded counts, then repeat
-   the main summary or model with all valid nonnegative values, including
-   zeros and values at or above 25.5 µg/m³. Discuss what changes and whether
-   high readings could be real events.
+   removing invalid codes. Report retained and excluded counts. Explain
+   which valid zeros and high readings this rule removes and why some high
+   readings could be real events.
 :::
 
 ::: {#exr-pm25-daily}
@@ -91,9 +93,9 @@ Create daily data and merge the sources.
 a. Calculate daily maxima separately for each NYCCAS and AirNow monitor.
    Average the available AirNow monitor maxima for each date and report how
    many monitors contribute to each background estimate.
-b. Create dates from the UTC timestamps. As a sensitivity check, convert
-   timestamps to New York local time before creating dates; report which
-   daily observations change and explain the difference.
+b. Create dates from the UTC timestamps. Show one example hour whose
+   New York local calendar date differs from its UTC date, and explain why
+   the chosen date convention matters for a daily maximum.
 c. Join date-level background estimates to NYCCAS monitor-days. Report row
    counts before and after the join, validate its cardinality, and explain
    how dates without background measurements are handled. Do not join the
@@ -106,92 +108,69 @@ d. Create a policy indicator that switches on January 5, 2025, and a variable
 ::: {#exr-pm25-eda}
 Explore and visualize the hourly and daily measurements.
 
-a. Plot hourly-value distributions and daily maximum PM2.5 over time for
-   each CRZ monitor. Mark January 5, 2025. Use a faceted plot to compare daily
-   maxima across months and weekdays, then describe gaps, site differences,
-   calendar patterns, and unusually high readings. Explain what the facets
-   make easier to compare.
+a. Make a faceted plot of CRZ monitor daily maxima by month, with separate
+   weekday panels. Describe one seasonal pattern and one weekday comparison.
+   Explain what the facets make easier to see.
 b. Plot the daily regional background series alongside the CRZ series.
    Compare the CRZ-minus-background difference before and after the policy
    date and explain why this raw contrast is descriptive.
 c. Summarize how many AirNow monitors contribute to each daily background
    estimate and how many CRZ sites contribute over time. Explain why missing
    measurements are not zero-valued measurements.
-d. Compare full-period trends with the primary range-filtered trends.
-   Discuss how valid zeros and a few high readings can change daily-maximum
-   summaries.
+d. Plot the daily CRZ-minus-background PM2.5 distributions before and
+   after January 5, 2025. Compare their medians and spreads. Use a two-sided
+   Mann–Whitney U test to compare the distributions: state the hypotheses,
+   report both sample sizes, the test statistic and $p$-value, and interpret
+   the result at the 0.05 level. Explain the test's independence assumption
+   and why seasonality and nearby-day dependence limit its interpretation.
 :::
 
 ::: {#exr-pm25-model}
 Model high-PM2.5 days and interpret the results.
 
-For each date, average the available CRZ monitor-specific daily maxima.
-Define a high-PM2.5 day as a daily CRZ mean above the 75th percentile of
-that measure before January 5, 2025. Calculate the cutoff using the primary
-cleaned data, then keep it unchanged in the sensitivity analyses. This
-study-specific cutoff is not a health standard. Report how many monitors
-contribute on each date.
+For each UTC date, average the available CRZ monitor-specific daily
+maxima. Define a high day as a CRZ daily mean above its pre-policy 75th
+percentile. This study-specific cutoff is not a health standard.
 
-Your model must include a pre-policy time trend, an intervention level
-change, a change in trend after the intervention, and the daily AirNow
-regional background estimate. Fraser et al. use the square root of this
-background estimate as a covariate in their predictive models; you may use
-that transformation or justify another form. Choose any additional covariates
-you consider useful. Define time in years from the start of the study, an
-indicator that switches on January 5, 2025, and elapsed years since that date
-(zero before the policy). A general form is
+Fit a segmented logistic model with time in years from the study start
+($t$), an indicator for January 5, 2025, onward ($T_t$), years since that
+date set to zero beforehand ($D_t$), and daily AirNow background. Fraser et
+al. use square-rooted background; justify your chosen form. Other covariates,
+such as month or day type, are your choice. A general model is
 
 $$
 \log\left(\frac{P(H_t=1)}{1-P(H_t=1)}\right)
 = \beta_0 + \beta_1 t + \beta_2 T_t + \beta_3 D_t + g(X_t),
 $$
 
-where $H_t$ equals one when the CRZ daily mean exceeds the pre-policy 75th
-percentile, $t$ is years since the study begins, $T_t$ is the intervention
-indicator, and $D_t$ is years since the intervention (zero before it). The
-function $g(X_t)$ must include the daily AirNow regional background estimate
-and may include other covariates you choose to include.
-The coefficient $\beta_2$ describes the immediate change in log odds at the
-intervention date, and $\beta_3$ describes the change in the yearly log-odds
-trend. Choose and construct any additional variables that help address
-calendar patterns or regional conditions; explain their coding and why they
-belong in your model. Possibilities include month, weekday, and weekend or
-holiday status. AirNow is a regional background adjustment, not an untreated
-comparison group.
+where $H_t$ marks a high day and $g(X_t)$ contains AirNow background and
+any other covariates. The coefficients $\beta_2$ and $\beta_3$ describe
+the immediate level change and the change in yearly trend, respectively.
 
-a. Report the cutoff, high and non-high day counts, number of dates, and
-monitor coverage. Fit your segmented model and report the intervention
-level-change and trend-change estimates as odds ratios with 95% confidence
-intervals. Explain how you constructed and chose any additional covariates.
-Interpret estimates in terms of odds, not percentage-point changes in
-probability.
-b. Plot the observed high-day indicator and the model-predicted probability
-over time. Compare pre-policy and post-policy patterns and state whether
-the fitted change is concentrated at the policy date or accumulates as a
-trend change.
-c. Repeat the analysis using only the four monitors with data from the
-start of the study period, then using all valid hourly observations without
-the paper's range filter. Keep the primary cutoff fixed. Reconsider whether
-your engineered covariates remain appropriate in each sensitivity analysis.
-Compare estimates and describe how monitor coverage and data trimming affect
-the result.
-d. Check model fit and residual patterns over time. Explain why consecutive
-daily outcomes may be dependent and how this affects usual standard errors
-and confidence intervals. Explain why regional background is an adjustment
-variable rather than an untreated comparison group. Consider the short
-pre-policy record, weather, wildfire smoke, and changing monitor coverage;
-conclude whether the results support a causal claim and distinguish an
-estimated association from a causal effect.
+a. Calculate the high-day cutoff and indicator. Report high and non-high
+   day counts, the number of dates, and CRZ monitor coverage.
+b. Fit the segmented logistic model. Report and interpret the intervention
+   level-change and trend-change odds ratios with 95% confidence intervals.
+   Explain your AirNow background term and any other covariates.
+c. Plot observed high days and fitted probabilities over time. Describe the
+   pre-policy and post-policy patterns and whether the fitted change is an
+   immediate shift, a trend change, or both.
+d. Conclude by answering the research question. Use the residual pattern,
+   dependence between nearby days, regional background, and possible
+   confounding to explain how far the result supports a causal claim.
 :::
 
 **Submission.**
 Organize the report around these four steps. Include the Python code that
 produces every reported result, and explain each cleaning and modeling choice.
-Use ideas from chapters 1–9: reproducible projects, data checks, preparation,
-EDA, visualization, and logistic-model interpretation.
+Use ideas from chapters 1–9 of the
+[instructor book](https://statds.github.io/ids-book/): reproducible projects,
+data checks, preparation, EDA, visualization, and logistic-model interpretation.
 
 Submit an independently written Quarto report to the Classroom 50 assignment.
 Include your source code, selected tables and figures, cleaning decisions,
-model output, and interpretation. Your report must run when the supplied CSV
+model output, and interpretation. Your report must run when the supplied ZIP
 files are placed in the expected local `data/` folder. Do not submit the raw
 or cleaned data files.
+
+## References {.unnumbered}
