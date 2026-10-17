@@ -11,8 +11,11 @@ bibliography: references.bib
 
 # Midterm Project: PM2.5 and Congestion Pricing
 
-New York City began charging most vehicles entering Manhattan's Congestion
-Relief Zone (CRZ) on January 5, 2025. Did the odds of a high-PM2.5 day at CRZ
+New York City began charging most vehicles entering the Congestion Relief
+Zone (CRZ) on January 5, 2025. The CRZ covers Manhattan's local streets and
+avenues south of and including 60th Street, with exemptions for the FDR Drive,
+West Side Highway/Route 9A, and connections from the Hugh L. Carey Tunnel to
+West Street [@mta2024crz]. Did the odds of a high-PM2.5 day at CRZ
 monitors change after the policy began, accounting for regional background
 conditions? We define a high day relative to the pre-policy CRZ data; this is
 a study-specific threshold, not a health standard.
@@ -34,7 +37,7 @@ Include executable Python code that reads the supplied data from a local
 `data/` folder, documents each cleaning choice, and produces the tables and
 figures you discuss.
 
-The instructor will provide two ZIP files covering June 1, 2023, through
+Two ZIP files are provided, covering June 1, 2023, through
 August 31, 2026: [NYCCAS data](data/nyccas.zip) and
 [AirNow data](data/airnow.zip). Each ZIP contains one hourly CSV file. Keep
 both ZIPs in a local `data/` folder next to your report. You may read the
@@ -164,7 +167,7 @@ d. Conclude by answering the research question. Use the residual pattern,
 Organize the report around these four steps. Include the Python code that
 produces every reported result, and explain each cleaning and modeling choice.
 Use ideas from chapters 1–9 of the
-[instructor book](https://statds.github.io/ids-book/): reproducible projects,
+[course book](https://statds.github.io/ids-book/): reproducible projects,
 data checks, preparation, EDA, visualization, and logistic-model interpretation.
 
 Submit an independently written Quarto report to the Classroom 50 assignment.
