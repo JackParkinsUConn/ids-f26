@@ -64,8 +64,8 @@ your report.
 
 ## Exercises {.unnumbered}
 
-Use the same virtual environment of the ids-book project to ensure
-reproducibility of your report on my computer.
+Use the same Python virtual environment as the `ids-book` project so your
+report can be reproduced in the course grading environment.
 
 You may use AI tools to brainstorm, explain data-science concepts and
 workflows, consult programming documentation, and suggest or debug code. You
@@ -81,11 +81,13 @@ a. State the observational unit in each file and identify the field that
    distinguishes monitors.
 b. Identify each file's timestamp and concentration fields, state the time
    zone and units, and explain what time an hourly timestamp represents.
-c. Standardize the needed column names and parse timestamps as UTC. Report
-   null-cell and duplicate monitor-hour counts. For each monitor, report the
-   absent-hour count within its first-to-last observation window. Identify
-   all monitor-months with the largest absent-hour count, and distinguish
-   absent hours from null cells and time before a monitor began reporting.
+c. Check the timestamp strings for multiple formats and describe any you
+   find. Standardize the needed column names and parse timestamps as UTC.
+   Report null-cell and duplicate monitor-hour counts. For each monitor,
+   report the absent-hour count within its first-to-last observation window.
+   Identify all monitor-months tied for the largest absent-hour count within
+   each source. Distinguish absent hours from null cells and time before a
+   monitor began reporting.
 d. Inspect unusual AirNow values, including negative codes. Identify the
    invalid code or codes, report how many rows they affect, and explain the
    exclusion rule. Apply the rule to a working copy and leave the source
