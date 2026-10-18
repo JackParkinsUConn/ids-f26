@@ -84,24 +84,25 @@ b. Identify each file's timestamp and concentration fields, state the time
 c. Standardize the needed column names and parse timestamps as UTC. Report
    null-cell and duplicate monitor-hour counts. For each monitor, report the
    absent-hour count within its first-to-last observation window. Identify
-   the monitor-month with the most absent hours, and distinguish absent
-   hours from null cells and time before a monitor began reporting.
+   all monitor-months with the largest absent-hour count, and distinguish
+   absent hours from null cells and time before a monitor began reporting.
 d. Inspect unusual AirNow values, including negative codes. Identify the
    invalid code or codes, report how many rows they affect, and explain the
    exclusion rule. Apply the rule to a working copy and leave the source
    files unchanged.
-e. After excluding invalid codes, apply the paper's strict range,
-   $0 < PM_{2.5} < 25.5$ µg/m³. For each source, report eligible, retained,
-   and excluded row counts. Also report how many valid zero and high readings
-   the rule removes, and explain why some high readings could be real events.
+e. After excluding invalid codes, apply the project's strict range,
+   $0 < PM_{2.5} < 25.5$ µg/m³. For each source, report row counts before
+   and after this filter and the number excluded. Separate excluded zeros
+   from readings at or above 25.5, and explain why high readings need not be
+   errors.
 :::
 
 ::: {#exr-pm25-daily}
 Create daily data and merge the sources.
 
-a. Create one monitor-day row for each NYCCAS and AirNow monitor with an
-   observation that day. Calculate each row's daily maximum and report the
-   number of monitor-day rows for each source.
+a. Using retained hourly readings, calculate each monitor's daily maximum by
+   UTC date. Keep one row per monitor-day with at least one retained reading,
+   and report each source's row count.
 b. Average the available AirNow monitor maxima for each UTC date. Record the
    number of contributing monitors and report a frequency table of dates by
    number of contributing monitors.
@@ -110,19 +111,19 @@ c. Create dates from the UTC timestamps. Show one example hour whose
    the chosen date convention matters for a daily maximum.
 d. Left-join the date-level background estimates to the NYCCAS monitor-day
    table. Report row counts before and after the join, validate the expected
-   many-to-one join, and explain how dates without background measurements
-   are represented. Do not join the hourly files directly or replace missing
-   measurements with zero.
+   many-to-one join, report how many rows lack background estimates, and
+   explain how the join represents missing values. Do not join the hourly
+   files directly or replace missing measurements with zero.
 e. Create an indicator that switches on January 5, 2025, and an elapsed-days
    variable that is zero before and on that date. Retain January 2025 and
    report the indicator and elapsed-days values for January 4, 5, and 6.
 :::
 
 ::: {#exr-pm25-eda}
-Explore and visualize the hourly and daily measurements.
+Explore and visualize the daily measurements.
 
-a. Plot CRZ monitor daily maxima with month on the horizontal axis, daily
-   maximum PM2.5 on the vertical axis, and a separate panel for each weekday.
+a. Plot CRZ monitor daily maxima against month of year (January–December),
+   pooling years, with a separate panel for each weekday.
 b. Describe one seasonal pattern and compare two weekdays within a month,
    referring to the plot. Explain how the facets help make these patterns
    visible.
@@ -131,9 +132,9 @@ c. For each UTC date, average the available CRZ monitor daily maxima. Plot
    CRZ-minus-background difference before and after the policy date and the
    change in that mean difference. Explain why this raw contrast is
    descriptive.
-d. Show frequency tables of dates by the number of contributing AirNow
-   monitors and by the number of contributing CRZ sites. Explain why missing
-   measurements are not zero-valued measurements.
+d. Show a frequency table of dates by the number of contributing CRZ sites.
+   Compare it with the AirNow coverage table from @exr-pm25-daily (b), and
+   explain why absent measurements cannot be treated as zeros.
 e. Plot the daily CRZ-minus-background PM2.5 distributions before and
    after January 5, 2025. Compare their medians and spreads. Use a two-sided
    Mann–Whitney U test to compare the distributions: state the hypotheses,
@@ -162,15 +163,16 @@ $$
 
 where $H_t$ marks a high day and $g(X_t)$ contains AirNow background and
 any other covariates. The coefficients $\beta_2$ and $\beta_3$ describe
-the immediate level change and the change in yearly trend, respectively.
+the immediate change in log odds and the change in the yearly log-odds
+slope, respectively.
 
 a. Calculate the 75th percentile of the pre-policy CRZ daily means. State
    the resulting cutoff and define how it classifies each date as high or
    non-high.
 b. Make a two-way cross-tabulation of high-day status by policy period
    (before versus after January 5, 2025). Show counts and percentages within
-   each period. Also report the number of dates and summarize CRZ monitor
-   coverage with a frequency table by number of contributing sites.
+   each period. Report how many dates remain for modeling after
+   excluding missing background values.
 c. Fit the segmented logistic model. Report and interpret the intervention
    level-change and trend-change odds ratios with 95% confidence intervals.
    Explain your AirNow background term and any other covariates.
