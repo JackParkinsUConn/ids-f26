@@ -26,8 +26,10 @@ details.
 ## Collaborative Notes
 
 The Fall 2026 collaborative notes supplement the instructor-authored
-*Introduction to Data Science* book. They give students practice explaining
-data-science concepts and working through a Git and GitHub review process.
+[Introduction to Data Science book](https://statds.github.io/ids-book). They
+give students a real opportunity to contribute to a public resource for future
+readers and to practice the contribution and review process used in open-source
+projects.
 
 The notes are maintained in the
 [`ids-f26` repository](https://github.com/statds/ids-f26). Students contribute
