@@ -260,8 +260,38 @@ through Classroom 50.
 
 Begin considering final-project questions early in the semester. A suitable
 project starts with a meaningful question, uses data appropriate to that
-question, and communicates both findings and limitations. Potential sources of
-project ideas include:
+question, and communicates both findings and limitations.
+
+#### Proposal Consultation
+
+Use the 15-minute consultation to clarify the project and identify the next
+steps. Be prepared to discuss these questions:
+
+1. **Scientific question (2 min):** What do you want to learn, and why should
+   someone care about the answer?
+2. **Scope (1 min):** What population, place, time period, or phenomenon will
+   you study?
+3. **Existing work (2 min):** What have other researchers found that is most
+   relevant, and what gap or next question does your project address?
+4. **Data (2 min):** What are the observational units and outcome? Where will
+   the data come from, which key variables are available, and what might be
+   missing or poorly measured?
+5. **Statistical formulation (2 min):** What quantity or relationship will you
+   estimate? Which predictors or groups will you compare, and what role does
+   each play?
+6. **Methods (2 min):** What analysis will answer the question, and why is it
+   suitable for the outcome and data? What plot or summary will you examine
+   first?
+7. **Assumptions and limitations (2 min):** What must be true for your
+   interpretation to hold? What could bias the result, and what conclusion
+   would the data not support?
+8. **Story and deliverable (2 min):** What might your main figure or table
+   show? If the result is null or opposite to what you expect, what will the
+   takeaway be?
+
+End by identifying the biggest unresolved decision and a concrete next step.
+
+Potential sources of project ideas include:
 
 - [ASA Data Challenge Expo](https://community.amstat.org/dataexpo/home)
 - [Kaggle](https://www.kaggle.com/)
