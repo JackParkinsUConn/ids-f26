@@ -30,6 +30,20 @@ plt.rcParams.update({
 })
 ```
 
+## About me
+
+**Enrico Ong**, Statistical Data Science major and Economics minor at UConn (graduating May 2028)
+
+- **Experience:** remote Pfizer project building an OCR pipeline and a RAG chatbot for scanned documents; IT Business Systems Analyst intern at Putnam Plastics and Putnam Medical; housing data analysis at EDEN
+- **Projects:** NBA player statistics in R; an economic nowcasting dashboard; USD to PHP remittance analysis
+- **Why this topic:** every one of these starts with a table, and pandas is how that table gets cleaned and summarized
+
+::: notes
+Quick introduction, about 20 seconds. Tie it to the topic: the work I
+have done with data begins with tables, so the four verbs in this deck
+are the ones I use most. Then move on to the question for today.
+:::
+
 ## Four verbs turn a table into an answer
 
 | Verb | Question it answers | pandas tool |
@@ -50,11 +64,29 @@ work on any dataset. Guiding question: how do a few operations take us
 from a raw table to an answered question?
 :::
 
-## Our data: earnings for 173 college majors
+## import pandas as pd: why "pd"?
 
 ```{python}
 import pandas as pd
+print(pd.__name__)
+```
 
+- `import pandas` loads the library; `as pd` gives it a short nickname
+- Without the nickname: `pandas.read_csv(...)`. With it: `pd.read_csv(...)`
+- `pd` is the convention in the pandas documentation and most tutorials, so code reads the same everywhere
+
+**Notice:** `pd.__name__` prints `pandas`. The nickname is the same library.
+
+::: notes
+The alias is only a shorter name for the module (np for NumPy and plt for matplotlib.pyplot follow the same habit). Any name would work,
+but pd is what everyone expects, so using it makes code easy to read and
+to copy from documentation. It saves typing because pandas functions are
+called constantly.
+:::
+
+## Our data: earnings for 173 college majors
+
+```{python}
 grads = pd.read_csv("data/recent-grads.csv")
 grads[["Major", "Major_category", "Median"]].head(2)
 ```
