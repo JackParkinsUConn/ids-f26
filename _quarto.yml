@@ -13,6 +13,7 @@ book:
       url: https://statcomp.org
     - name: Amanda Noe
     - name: Enrico Ong
+    - name: Erik Chervonny
   date: today
   chapters:
     - index.qmd
