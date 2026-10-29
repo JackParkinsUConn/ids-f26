@@ -477,8 +477,8 @@ accepted.
 | 10/28 | Bucco, Sadie | Random Forests |
 | 11/02 | -- | No class in exchange of midterm-project time |
 | 11/04 | Tria, Nicholas | Naive Bayes |
-| 11/04 | Parkins, Jack | LLM Agents |
-| 11/09 | Chok, Isaac | [topic] |
+| 11/04 | Chok, Isaac | [topic] |
+| 11/09 | Parkins, Jack | LLM Agents |
 | 11/09 | Horan, Elizabeth | Support vector machines |
 | 11/11 | Distefano, Cristian | [topic] |
 | 11/11 | Nair, Pardhip | [topic] |
