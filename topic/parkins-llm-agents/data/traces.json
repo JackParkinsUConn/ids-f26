@@ -1,0 +1,156 @@
+{
+ "plain": {
+  "source": "scripted seed (run record.py to record a real model)",
+  "question": "Which stock had the higher return from 2026-01-02 to 2026-06-30, HSKY or JNTH, and by how many percentage points?",
+  "answer": "I don't have access to price data for HSKY or JNTH, so I can't compute their returns. Typically you would divide the ending price by the starting price and subtract 1."
+ },
+ "scenarios": {
+  "main": {
+   "source": "scripted seed (run record.py to record a real model)",
+   "question": "Which stock had the higher return from 2026-01-02 to 2026-06-30, HSKY or JNTH, and by how many percentage points?",
+   "max_steps": 8,
+   "turns": [
+    {
+     "thought": "I need both stocks' prices over the window.",
+     "tool": "get_prices",
+     "args": {
+      "ticker": "HSKY",
+      "start": "2026-01-02",
+      "end": "2026-06-30"
+     }
+    },
+    {
+     "thought": "Now the same window for JNTH.",
+     "tool": "get_prices",
+     "args": {
+      "ticker": "JNTH",
+      "start": "2026-01-02",
+      "end": "2026-06-30"
+     }
+    },
+    {
+     "thought": "Compute HSKY's percent return exactly.",
+     "tool": "calculator",
+     "args": {
+      "expression": "(123.07 / 100.0 - 1) * 100"
+     }
+    },
+    {
+     "thought": "Compute JNTH's percent return exactly.",
+     "tool": "calculator",
+     "args": {
+      "expression": "(100.87 / 80.0 - 1) * 100"
+     }
+    },
+    {
+     "thought": "I have both returns.",
+     "final": "JNTH had the higher return: HSKY +23.07% vs JNTH +26.09%, a gap of 3.02 percentage points."
+    }
+   ]
+  },
+  "bad_args": {
+   "source": "scripted to show a failure mode",
+   "question": "Which stock had the higher return from 2026-01-02 to 2026-06-30, HSKY or JNTH, and by how many percentage points?",
+   "max_steps": 8,
+   "turns": [
+    {
+     "thought": "Look up Husky's prices first.",
+     "tool": "get_prices",
+     "args": {
+      "ticker": "HUSKY",
+      "start": "2026-01-02",
+      "end": "2026-06-30"
+     }
+    },
+    {
+     "thought": "The error lists valid tickers. Use HSKY.",
+     "tool": "get_prices",
+     "args": {
+      "ticker": "HSKY",
+      "start": "2026-01-02",
+      "end": "2026-06-30"
+     }
+    },
+    {
+     "thought": "Now the same window for JNTH.",
+     "tool": "get_prices",
+     "args": {
+      "ticker": "JNTH",
+      "start": "2026-01-02",
+      "end": "2026-06-30"
+     }
+    },
+    {
+     "thought": "Compute HSKY's percent return exactly.",
+     "tool": "calculator",
+     "args": {
+      "expression": "(123.07 / 100.0 - 1) * 100"
+     }
+    },
+    {
+     "thought": "Compute JNTH's percent return exactly.",
+     "tool": "calculator",
+     "args": {
+      "expression": "(100.87 / 80.0 - 1) * 100"
+     }
+    },
+    {
+     "thought": "I have both returns.",
+     "final": "JNTH had the higher return: HSKY +23.07% vs JNTH +26.09%, a gap of 3.02 percentage points."
+    }
+   ]
+  },
+  "loop": {
+   "source": "scripted to show a failure mode",
+   "question": "What will HSKY close at on 2026-07-10?",
+   "max_steps": 4,
+   "turns": [
+    {
+     "thought": "Look up HSKY on 2026-07-10.",
+     "tool": "get_prices",
+     "args": {
+      "ticker": "HSKY",
+      "start": "2026-07-10",
+      "end": "2026-07-10"
+     }
+    },
+    {
+     "thought": "Maybe that day is missing. Try a wider window.",
+     "tool": "get_prices",
+     "args": {
+      "ticker": "HSKY",
+      "start": "2026-07-09",
+      "end": "2026-07-10"
+     }
+    },
+    {
+     "thought": "Still nothing. Widen the window again.",
+     "tool": "get_prices",
+     "args": {
+      "ticker": "HSKY",
+      "start": "2026-07-06",
+      "end": "2026-07-10"
+     }
+    },
+    {
+     "thought": "Try starting right after the last date.",
+     "tool": "get_prices",
+     "args": {
+      "ticker": "HSKY",
+      "start": "2026-07-01",
+      "end": "2026-07-10"
+     }
+    },
+    {
+     "thought": "Try once more.",
+     "tool": "get_prices",
+     "args": {
+      "ticker": "HSKY",
+      "start": "2026-07-01",
+      "end": "2026-07-10"
+     }
+    }
+   ]
+  }
+ }
+}
