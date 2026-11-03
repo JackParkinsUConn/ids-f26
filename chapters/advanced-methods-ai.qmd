@@ -3,6 +3,17 @@
 Student presentations in this chapter concern advanced computational methods,
 deep learning, natural-language processing, and artificial intelligence.
 
-| Presentation | Presenter | Description |
-|:--|:--|:--|
-| [LLM Agents](../topic/parkins-llm-agents/) | Jack Parkins | Shows how an LLM agent answers a data question by calling tools in a loop, using a small stock-return example with a click-through trace and cached model turns so it renders without an API key. Covers bad tool arguments, runaway loops, and why agent evaluation needs confidence intervals. |
++-----------------------+--------------+--------------------------------------+
+| Presentation          | Presenter    | Description                          |
++=======================+==============+======================================+
+| [LLM Agents][parkins] | Jack Parkins | Explains how an LLM agent answers a  |
+|                       |              | data question by calling tools in a  |
+|                       |              | loop, using a scripted teaching      |
+|                       |              | example (pre-written model turns,    |
+|                       |              | real tools) on simulated stock data. |
+|                       |              | Covers failure modes and how to      |
+|                       |              | evaluate an agent with a binomial    |
+|                       |              | model and Wilson intervals.          |
++-----------------------+--------------+--------------------------------------+
+
+[parkins]: ../topic/parkins-llm-agents/

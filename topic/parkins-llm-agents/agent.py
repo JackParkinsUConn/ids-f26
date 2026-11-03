@@ -21,11 +21,20 @@ def get_prices(ticker, start, end):
         raise ValueError(
             f"unknown ticker '{ticker}'. Valid tickers: {', '.join(TICKERS)}"
         )
-    last = PRICES["date"].max()
-    if pd.Timestamp(start) > last:
-        raise ValueError(f"no data after {last:%Y-%m-%d}")
+    start, end = pd.Timestamp(start), pd.Timestamp(end)
+    if start > end:
+        raise ValueError("start date is after end date; swap them")
+    first_day, last_day = PRICES["date"].min(), PRICES["date"].max()
+    if start > last_day:
+        raise ValueError(f"no data after {last_day:%Y-%m-%d}")
     df = PRICES[(PRICES["ticker"] == ticker)
                 & PRICES["date"].between(start, end)]
+    if df.empty:
+        raise ValueError(
+            f"no trading days from {start:%Y-%m-%d} to {end:%Y-%m-%d}; "
+            f"data covers weekdays {first_day:%Y-%m-%d} to "
+            f"{last_day:%Y-%m-%d}, so try a wider window"
+        )
     first, final = df.iloc[0], df.iloc[-1]
     return {
         "ticker": ticker,
@@ -38,20 +47,23 @@ def get_prices(ticker, start, end):
 
 _OPS = {
     ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,
-    ast.Div: operator.truediv, ast.Pow: operator.pow, ast.USub: operator.neg,
+    ast.Div: operator.truediv, ast.USub: operator.neg,
 }
 
 
 def calculator(expression):
-    """Safe arithmetic eval."""
+    """Limited floating-point arithmetic: numbers and + - * / only."""
+    if len(expression) > 200:
+        raise ValueError("expression too long (200 characters max)")
+
     def ev(node):
         if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
             return node.value
-        if isinstance(node, ast.BinOp):
+        if isinstance(node, ast.BinOp) and type(node.op) in _OPS:
             return _OPS[type(node.op)](ev(node.left), ev(node.right))
-        if isinstance(node, ast.UnaryOp):
+        if isinstance(node, ast.UnaryOp) and type(node.op) in _OPS:
             return _OPS[type(node.op)](ev(node.operand))
-        raise ValueError("only numbers and + - * / ** allowed")
+        raise ValueError("only numbers and + - * / are allowed")
     return round(ev(ast.parse(expression, mode="eval").body), 4)
 
 
@@ -73,7 +85,7 @@ TOOL_SCHEMAS = [
     },
     {
         "name": "calculator",
-        "description": "Evaluate an arithmetic expression exactly.",
+        "description": "Floating-point arithmetic with + - * / only.",
         "input_schema": {
             "type": "object",
             "properties": {"expression": {"type": "string"}},
@@ -105,7 +117,12 @@ def run_agent(question, llm, tools=TOOLS, max_steps=8):
 
 
 class ReplayLLM:
-    """Replays recorded model turns so the deck needs no API key."""
+    """Scripted stand-in for a model.
+
+    Returns pre-written turns in order and ignores `messages`, so it shows
+    the loop's mechanics, not a model's planning. Turns come from
+    data/traces.json (scripted by make_data.py, or recorded by record.py).
+    """
 
     def __init__(self, turns):
         self.turns, self.i = turns, 0
@@ -139,7 +156,7 @@ def _show(res):
         return (f"{res['ticker']}: ${res['start_close']:.2f} "
                 f"({d(res['start_date'])}) \u2192 ${res['end_close']:.2f} "
                 f"({d(res['end_date'])})")
-    return f"{res:.2f}" if isinstance(res, float) else str(res)
+    return str(res)
 
 
 def _events(trace):

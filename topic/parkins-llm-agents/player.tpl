@@ -6,7 +6,7 @@
 .agent-player .ap-bar{height:4px;background:#e2e8f0;border-radius:2px;
   overflow:hidden}
 .agent-player .ap-bar i{display:block;height:100%;width:0;
-  background:linear-gradient(90deg,#2563eb,#7c3aed);transition:width .35s}
+  background:#2563eb;transition:width .35s}
 .agent-player .ap-q{display:flex;gap:10px;align-items:baseline}
 .agent-player .ap-tag{font-weight:800;font-size:15px;letter-spacing:.06em;
   text-transform:uppercase;color:#7c3aed;white-space:nowrap}
@@ -65,10 +65,9 @@
 .agent-player button{font-size:17px;padding:6px 16px;border-radius:999px;
   border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-family:inherit;
   font-weight:600;color:#334155}
-.agent-player button.pri{background:linear-gradient(90deg,#2563eb,#7c3aed);
-  color:#fff;border:none}
+.agent-player button.pri{background:#2563eb;color:#fff;border:none}
 .agent-player button:disabled{opacity:.35;cursor:default}
-.agent-player .ap-src{margin-left:auto;color:#94a3b8;font-size:13px}
+.agent-player .ap-src{margin-left:auto;color:#64748b;font-size:14px}
 .agent-player.halt .ap-log{box-shadow:0 0 0 3px #fdba74}
 .agent-player.notools .nd.tool,.agent-player.notools .nd.obs,
 .agent-player.notools .ar,.agent-player.notools .al{opacity:.18}
@@ -134,7 +133,7 @@
   const arrow = {call:"decide", obs:"run", error:"run"};
   let i = 0, timer = null, typing = null, prev = null;
   $(".qt").textContent = d.q;
-  $(".ap-src").textContent = "model turns: " + d.src;
+  $(".ap-src").textContent = "Model turns: " + d.src;
   function light(n, a){
     root.querySelectorAll(".nd").forEach(g =>
       g.classList.toggle("on", g.classList.contains(n)));

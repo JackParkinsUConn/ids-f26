@@ -1,12 +1,12 @@
 {
  "plain": {
-  "source": "scripted seed (run record.py to record a real model)",
+  "source": "scripted teaching example (pre-written turns, not a model)",
   "question": "Which stock had the higher return from 2026-01-02 to 2026-06-30, HSKY or JNTH, and by how many percentage points?",
   "answer": "I don't have access to price data for HSKY or JNTH, so I can't compute their returns. Typically you would divide the ending price by the starting price and subtract 1."
  },
  "scenarios": {
   "main": {
-   "source": "scripted seed (run record.py to record a real model)",
+   "source": "scripted teaching example (pre-written turns, not a model)",
    "question": "Which stock had the higher return from 2026-01-02 to 2026-06-30, HSKY or JNTH, and by how many percentage points?",
    "max_steps": 8,
    "turns": [
@@ -29,27 +29,34 @@
      }
     },
     {
-     "thought": "Compute HSKY's percent return exactly.",
+     "thought": "Compute HSKY's percent return.",
      "tool": "calculator",
      "args": {
       "expression": "(123.07 / 100.0 - 1) * 100"
      }
     },
     {
-     "thought": "Compute JNTH's percent return exactly.",
+     "thought": "Compute JNTH's percent return.",
      "tool": "calculator",
      "args": {
       "expression": "(100.87 / 80.0 - 1) * 100"
      }
     },
     {
-     "thought": "I have both returns.",
+     "thought": "JNTH is higher. Compute the gap in percentage points.",
+     "tool": "calculator",
+     "args": {
+      "expression": "26.0875 - 23.07"
+     }
+    },
+    {
+     "thought": "I have both returns and the gap.",
      "final": "JNTH had the higher return: HSKY +23.07% vs JNTH +26.09%, a gap of 3.02 percentage points."
     }
    ]
   },
   "bad_args": {
-   "source": "scripted to show a failure mode",
+   "source": "scripted teaching example (pre-written turns, not a model)",
    "question": "Which stock had the higher return from 2026-01-02 to 2026-06-30, HSKY or JNTH, and by how many percentage points?",
    "max_steps": 8,
    "turns": [
@@ -81,27 +88,34 @@
      }
     },
     {
-     "thought": "Compute HSKY's percent return exactly.",
+     "thought": "Compute HSKY's percent return.",
      "tool": "calculator",
      "args": {
       "expression": "(123.07 / 100.0 - 1) * 100"
      }
     },
     {
-     "thought": "Compute JNTH's percent return exactly.",
+     "thought": "Compute JNTH's percent return.",
      "tool": "calculator",
      "args": {
       "expression": "(100.87 / 80.0 - 1) * 100"
      }
     },
     {
-     "thought": "I have both returns.",
+     "thought": "JNTH is higher. Compute the gap in percentage points.",
+     "tool": "calculator",
+     "args": {
+      "expression": "26.0875 - 23.07"
+     }
+    },
+    {
+     "thought": "I have both returns and the gap.",
      "final": "JNTH had the higher return: HSKY +23.07% vs JNTH +26.09%, a gap of 3.02 percentage points."
     }
    ]
   },
   "loop": {
-   "source": "scripted to show a failure mode",
+   "source": "scripted teaching example (pre-written turns, not a model)",
    "question": "What will HSKY close at on 2026-07-10?",
    "max_steps": 4,
    "turns": [

@@ -3,21 +3,14 @@ title: "LLM Agents"
 subtitle: "Introduction to Data Science | Fall 2026"
 author: "Jack Parkins"
 bibliography: references.bib
-title-slide-attributes:
-  data-background-image: figures/hero.svg
-  data-background-size: cover
 format:
   revealjs:
     width: 1280
     height: 720
     slide-number: true
     preview-links: auto
-    theme: [default, custom.scss]
+    theme: default
     incremental: false
-    transition: fade
-    transition-speed: fast
-    mainfont: "Source Sans Pro, Helvetica, sans-serif"
-    monofont: "JetBrains Mono, Consolas, Menlo, monospace"
     code-line-numbers: false
 jupyter: python3
 ---
@@ -25,274 +18,273 @@ jupyter: python3
 ```{python}
 #| include: false
 import inspect
+from math import sqrt
 
-import matplotlib.pyplot as plt
 import pandas as pd
 
-from agent import (PRICES, ci_widget, load_traces, player, player_bare,
-                   replay, run_agent)
+from agent import (PRICES, TOOLS, ci_widget, get_prices, load_traces, player,
+                   player_bare, replay, run_agent)
 
 traces = load_traces()
+QUESTION = traces["scenarios"]["main"]["question"]
 _, MAIN = replay("main")
-FINAL = MAIN[-1]["final"]
 
 
 def raw(html):
     print("```{=html}\n" + html + "\n```")
+
+
+def wilson(k, n, z=1.96):
+    p = k / n
+    mid = (p + z**2 / (2 * n)) / (1 + z**2 / n)
+    half = z * sqrt(p * (1 - p) / n + z**2 / (4 * n**2)) / (1 + z**2 / n)
+    return mid - half, mid + half
 ```
 
 ## About Me
 
-:::: {.columns}
-::: {.column width="55%"}
 - **Jack Parkins**, junior in Statistical Data Science
   (Financial Analysis concentration)
 - From Hinsdale, IL, outside Chicago
-- Why this topic: I have built agents at work, and I want to show
-  what is actually happening inside one
-:::
-::: {.column width="45%"}
-::: {.card .agent style="height:auto;margin-bottom:14px"}
-[JPMorgan Chase]{.hd} Incoming Analyst, summer 2027
-:::
-::: {.card .agent style="height:auto"}
-[Ensono]{.hd} AI Transformation Intern: built AI agents for finance
-workflows
-:::
-:::
-::::
+- Incoming Analyst at JPMorgan Chase, summer 2027
+- Built AI agents for finance workflows as an AI Transformation Intern
+  at Ensono
+- Why this topic: I want to show what is actually happening inside an
+  agent
 
 ## Demo 1: Ask a Bare LLM
 
+A **large language model (LLM)** predicts text from a prompt. A *bare*
+LLM has no tools: it cannot open files or run code.
+
 ```{python}
 #| output: asis
-raw(player_bare(height=340))
+raw(player_bare(height=320))
 ```
 
-[The Claude and ChatGPT apps *can* answer this for real stocks, because
-the apps are agents: they wrap the model in a loop with web search and
-code tools. HSKY and JNTH stand in for **your own data**, which no model
-has seen.]{.muted .fragment style="font-size:0.75em"}
+**Scripted illustration:** this reply was written in advance to show a
+typical bare-model response; it is not a recorded model output.
 
 ## What Is an LLM Agent?
 
-::: {.bigidea}
-An LLM in a **loop** that picks a **tool**, reads the **result**, and
-repeats until it can answer [@yao2023react].
-:::
+An **LLM agent** runs an LLM in a loop: the LLM picks a **tool**, our
+code runs it, the **result** goes back to the LLM, and the loop repeats
+until it can answer [@yao2023react].
 
 ```{=html}
-<svg viewBox="0 0 1000 330" style="width:100%;height:255px"
+<svg viewBox="0 0 1000 300" style="width:100%;height:280px"
   aria-label="Question goes to the LLM; the LLM sends tool calls to our
   code, results come back, and finally the LLM returns an answer">
-<style>
-.lp .flow{fill:none;stroke:#7c3aed;stroke-width:3.5;stroke-dasharray:9 8;
-  animation:lpf .7s linear infinite}
-.lp .flat{fill:none;stroke:#94a3b8;stroke-width:3}
-.lp text{font-family:Inter,'Source Sans Pro',sans-serif}
-.lp .lb{font-size:19px;fill:#64748b;text-anchor:middle;
-  font-family:'JetBrains Mono',Consolas,monospace}
-@keyframes lpf{to{stroke-dashoffset:-17}}
-</style>
 <defs>
  <marker id="lpm" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6"
   markerHeight="6" orient="auto-start-reverse">
-  <path d="M0,0L10,5L0,10z" fill="#7c3aed"/></marker>
- <marker id="lpg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6"
-  markerHeight="6" orient="auto-start-reverse">
-  <path d="M0,0L10,5L0,10z" fill="#94a3b8"/></marker>
- <linearGradient id="lpgr" x1="0" x2="1"><stop offset="0" stop-color="#2563eb"/>
-  <stop offset="1" stop-color="#7c3aed"/></linearGradient>
- <path id="lpo" d="M500,95 C560,20 690,20 735,85 L735,130 C690,200 560,200
-  500,130 Z"/>
+  <path d="M0,0L10,5L0,10z" fill="#555"/></marker>
 </defs>
-<g class="lp">
- <rect x="20" y="85" width="170" height="56" rx="28" fill="#f8fafc"
-  stroke="#cbd5e1" stroke-width="2"/>
- <text x="105" y="120" text-anchor="middle" font-size="24"
-  font-weight="700" fill="#334155">Question</text>
- <path class="flat" d="M192,113 L278,113" marker-end="url(#lpg)"/>
- <rect x="285" y="65" width="215" height="96" rx="18" fill="#eff6ff"
-  stroke="#2563eb" stroke-width="3"/>
- <text x="392" y="108" text-anchor="middle" font-size="30"
-  font-weight="800" fill="#1e3a8a">LLM</text>
- <text x="392" y="138" text-anchor="middle" font-size="18"
-  fill="#3b82f6">picks next action</text>
- <rect x="740" y="45" width="240" height="136" rx="18" fill="#fffbeb"
-  stroke="#f59e0b" stroke-width="3"/>
- <text x="860" y="88" text-anchor="middle" font-size="28"
-  font-weight="800" fill="#92400e">Tools</text>
- <text x="860" y="122" text-anchor="middle" font-size="18"
-  fill="#b45309" font-family="JetBrains Mono,monospace">get_prices()</text>
- <text x="860" y="150" text-anchor="middle" font-size="18"
-  fill="#b45309" font-family="JetBrains Mono,monospace">calculator()</text>
- <path class="flow" d="M500,90 C560,25 680,25 735,80"
+<g font-family="sans-serif" fill="#222" text-anchor="middle">
+ <rect x="20" y="75" width="170" height="56" rx="8" fill="#f3f3f3"
+  stroke="#888" stroke-width="2"/>
+ <text x="105" y="110" font-size="24">Question</text>
+ <path d="M192,103 L278,103" stroke="#555" stroke-width="2.5" fill="none"
   marker-end="url(#lpm)"/>
- <text class="lb" x="618" y="35">tool call (JSON)</text>
- <path class="flow" d="M735,145 C680,200 560,200 505,140"
+ <rect x="285" y="55" width="215" height="96" rx="8" fill="#eaf1fd"
+  stroke="#2563eb" stroke-width="2.5"/>
+ <text x="392" y="98" font-size="28" font-weight="bold">LLM</text>
+ <text x="392" y="128" font-size="18">picks next action</text>
+ <rect x="740" y="35" width="240" height="136" rx="8" fill="#fdf5e6"
+  stroke="#b45309" stroke-width="2.5"/>
+ <text x="860" y="78" font-size="26" font-weight="bold">Tools</text>
+ <text x="860" y="112" font-size="18"
+  font-family="monospace">get_prices()</text>
+ <text x="860" y="140" font-size="18"
+  font-family="monospace">calculator()</text>
+ <path d="M500,80 C560,15 680,15 735,70" stroke="#555" stroke-width="2.5"
+  fill="none" marker-end="url(#lpm)"/>
+ <text x="618" y="25" font-size="19" font-family="monospace">tool call</text>
+ <path d="M735,135 C680,190 560,190 505,130" stroke="#555"
+  stroke-width="2.5" fill="none" marker-end="url(#lpm)"/>
+ <text x="618" y="200" font-size="19" font-family="monospace">result</text>
+ <path d="M392,153 L392,230" stroke="#555" stroke-width="2.5" fill="none"
   marker-end="url(#lpm)"/>
- <text class="lb" x="618" y="212">result → messages</text>
- <path class="flat" d="M392,163 L392,250" marker-end="url(#lpg)"/>
- <text class="lb" x="318" y="215">final answer</text>
- <rect x="292" y="255" width="200" height="56" rx="28"
-  fill="url(#lpgr)"/>
- <text x="392" y="291" text-anchor="middle" font-size="24"
-  font-weight="800" fill="#fff">Answer</text>
- <circle r="9" fill="#7c3aed" opacity=".9">
-  <animateMotion dur="2.8s" repeatCount="indefinite">
-   <mpath href="#lpo"/></animateMotion></circle>
+ <text x="320" y="200" font-size="19" font-family="monospace">answer</text>
+ <rect x="292" y="235" width="200" height="56" rx="8" fill="#f3f3f3"
+  stroke="#888" stroke-width="2"/>
+ <text x="392" y="271" font-size="24">Answer</text>
 </g>
 </svg>
 ```
 
-The model **never runs code**. It writes a JSON request, and our code
-runs it [@schick2023toolformer].
+The LLM never runs code itself. It writes a structured request, and our
+code runs it [@schick2023toolformer].
 
-## The Whole Agent Loop {.loopcode}
+## Messages, Tool Calls, and Results
+
+```{python}
+#| echo: true
+messages = [{"role": "user", "content": QUESTION}]   # conversation so far
+turn = {"tool": "get_prices",                        # the LLM's request
+        "args": {"ticker": "HSKY", "start": "2026-01-02",
+                 "end": "2026-06-30"}}
+result = TOOLS[turn["tool"]](**turn["args"])         # our code runs it
+result
+```
+
+- **Message history:** everything said so far, which the LLM reads
+  each turn
+- **Tool arguments:** the inputs the LLM chooses for a function
+- **Result:** what the function returns; we append it to the messages
+
+## The Whole Agent Loop
 
 ```{python}
 #| output: asis
 src = inspect.getsource(run_agent)
-print('```{.python code-line-numbers="|5|6-8|9-12|14-15|16"}')
+print('```{.python code-line-numbers="|5|6-8|9-12|13-15|16"}')
 print(src + "```")
 ```
 
-[**5** model picks a move]{.pill .good} [**6-8** done? stop]{.pill .ok}
-[**9-12** run the tool, catch errors]{.pill .good}
-[**14-15** feed the result back]{.pill .ok}
-[**16** step cap]{.pill .good}
+Line 5 asks the LLM; 6 to 8 stop on an answer; 9 to 12 run the tool;
+13 to 15 feed the result back; 16 is the step cap.
 
-## Demo 2: Same Question, Now an Agent
+## Scripted, Recorded, or Live?
+
+| | Scripted (this deck) | Recorded | Live |
+|:--|:--|:--|:--|
+| LLM turns | written by hand | saved from a real run | model called live |
+| Shows | how the loop works | what a model did once | what a model does now |
+| API key | no | to record (`record.py`) | yes |
+
+The demos that follow are **scripted**. The tools and the loop run for
+real, but the LLM's moves are pre-written and do not depend on the
+results, so they do not show that a model planned or recovered on its own.
+
+## Demo 2: The Same Question, With Tools
 
 ```{python}
 #| output: asis
-raw(player("main", height=520))
+raw(player("main", height=500))
 ```
 
-[HSKY and JNTH are fictional tickers simulated with a fixed seed
-(`make_data.py`).]{.slide-note}
+**Scripted teaching example.** HSKY and JNTH are fictional tickers
+simulated with a fixed seed (`make_data.py`).
 
-## Did It Get the Right Answer?
+## Checking the Answer
 
-Check the agent against pandas, computed directly from the CSV:
+The same quantities computed directly with pandas:
 
 ```{python}
 #| echo: true
 wide = PRICES.pivot(index="date", columns="ticker", values="close")
 ret = (wide.iloc[-1] / wide.iloc[0] - 1) * 100
-ret.round(2)
+winner, gap = ret.idxmax(), ret.max() - ret.min()
 ```
 
 ```{python}
-#| output: asis
-print(f"::: {{.bigidea}}\n**Agent:** {FINAL}\n:::")
+calc = [t["result"] for t in MAIN if t.get("tool") == "calculator"]
+agent_winner = MAIN[-1]["final"].split()[0]
+pd.DataFrame({
+    "pandas": [f"{ret['HSKY']:.2f}", f"{ret['JNTH']:.2f}", winner,
+               f"{gap:.2f}"],
+    "agent trace": [f"{calc[0]:.2f}", f"{calc[1]:.2f}", agent_winner,
+                    f"{calc[2]:.2f}"],
+}, index=["HSKY return (%)", "JNTH return (%)", "Winner",
+          "Gap (percentage points)"])
 ```
 
-Same numbers. Every price came from `get_prices` and every percent from
-`calculator`: the **model plans, the tools compute**, and the trace is an
-audit log.
+All four match: the prices came from `get_prices` and every number from
+`calculator`.
 
 ## When Agents Break: Endless Loops
 
 ```{python}
 #| output: asis
-raw(player("loop", height=500))
+raw(player("loop", height=470))
 ```
 
-Fix: always cap steps (and cost), and let tools say a task is impossible.
+Fix: cap the steps and let tools say when a task is impossible.
+**Scripted teaching example.**
 
 ## Other Ways Agents Fail
 
-::: {.incremental}
-- **Bad tool arguments:** a typo like `HUSKY` breaks the call, so return
-  errors that say how to recover
-- **Untrusted tool output:** text in a web page or file can hijack the
-  agent, called prompt injection [@greshake2023injection]
-- **Nondeterminism:** the same question can produce a different trace
-  every run
-- **Overkill:** if a fixed pipeline works, you may not need an agent
-  [@anthropic2024agents]
-:::
+- **Bad arguments:** tools should return errors that say how to recover
 
-## How Good Is Your Agent? A Stats Question
+```{python}
+#| echo: true
+try:
+    get_prices("HSKY", "2026-01-03", "2026-01-04")   # a weekend
+except ValueError as e:
+    print(e)
+```
 
-Each test task is a Bernoulli trial, so report a Wilson confidence
-interval [@wilson1927], not one good demo.
+- **Tool cost:** a step cap limits LLM calls, not how long one tool call
+  runs, so tools need their own limits
+- **Untrusted tool output:** text in a file or web page can hijack the
+  agent (prompt injection) [@greshake2023compromising]
+- **Overkill:** a fixed pipeline may be enough [@schluntz2024building]
+
+## Evaluating an Agent
+
+- **Success criterion:** a task passes if the final answer names the
+  correct winner and a gap within 0.01 points of the pandas value
+- **Task selection:** write a pool of questions (tickers, windows) before
+  testing, then draw tasks from it at random
+- **Model:** each of *n* tasks is an independent Bernoulli trial with a
+  common success probability *p*, so passes *k* ~ Binomial(*n*, *p*)
+- **Estimate:** p̂ = *k*/*n* with a 95% Wilson interval
+  [@wilson1927probable; @nist2012confidence]
+
+```{python}
+lo, hi = wilson(17, 20)
+```
+
+Hypothetical example: 17 of 20 passes gives p̂ = 0.85 with
+interval `{python} f"{lo:.3f}"` to `{python} f"{hi:.3f}"`.
+
+## Try It: Interval Width
 
 ```{python}
 #| output: asis
 raw(ci_widget())
 ```
 
-[17 of 20 looks like 85%, but it could be 64% to 95%. At 85% per run,
-5 straight passes happen only `{python} round(100 * 0.85 ** 5)`% of
-the time.]{.muted}
+p̂^*m*^ is a plug-in estimate: it treats the observed rate as the
+true *p* and assumes independent runs. The 70% line is illustrative,
+not an evaluated baseline.
 
 ## Takeaways
 
-:::: {.columns}
-::: {.column width="32%"}
-::: {.card .take}
-[01]{.grad style="font-size:2.2em;font-weight:800"}
+1. An agent is an **LLM in a loop with tools**: the LLM chooses steps,
+   and your code does the work.
+2. Put facts and arithmetic in **tools**, give them clear errors and
+   limits, and keep the **trace** so every number is checkable.
+3. Judge an agent with a defined success criterion and an **interval**,
+   not one demo.
 
-An agent is an **LLM in a loop with tools**: the model plans, your code
-does the work.
-:::
-:::
-::: {.column width="2%"}
-:::
-::: {.column width="32%"}
-::: {.card .take}
-[02]{.grad style="font-size:2.2em;font-weight:800"}
-
-Put facts and math in **tools**, and keep the **trace** so every number
-is auditable.
-:::
-:::
-::: {.column width="2%"}
-:::
-::: {.column width="32%"}
-::: {.card .take}
-[03]{.grad style="font-size:2.2em;font-weight:800"}
-
-Guard the loop with **step caps and clear errors**, and measure success
-with **intervals, not one demo**.
-:::
-:::
-::::
-
-## Citations
+## References
 
 ::: {#refs}
 :::
 
 ## Further Readings
 
-- [Building effective AI agents][bea], when to use agents vs. simple
-  workflows
-- [Claude tool use docs][tu], the real request and response format behind
-  `record.py`
-- [ReAct paper](https://arxiv.org/abs/2210.03629), the reason
-  then act pattern used in this deck
-- [Toolformer paper](https://arxiv.org/abs/2302.04761), how models learn
-  to call tools
-- [SWE-bench](https://arxiv.org/abs/2310.06770), a benchmark that grades
+- [Claude tool use documentation][tu]: the request and response format
+  used by `record.py`
+- [SWE-bench](https://arxiv.org/abs/2310.06770): a benchmark that grades
   agents on real GitHub issues
 
-[bea]: https://www.anthropic.com/engineering/building-effective-agents
 [tu]: https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview
 
 ## Resources {.smaller}
 
-- **Code in this folder**
-  - `agent.py`: tools, the agent loop, replay model, and widget helpers
-  - `player.tpl`, `ci.tpl`: HTML for the in-slide demos (no external
-    libraries)
-  - `make_data.py`: simulated prices and seed traces (fixed seed)
-  - `record.py`: optional, re-records traces from a real model
-    (needs `ANTHROPIC_API_KEY`; never runs during render)
-  - `data/prices.csv`, `data/traces.json`, `figures/hero.svg`,
-    `custom.scss`
-- **Reproduce:** `make render-one FILE=topic/parkins-llm-agents/index.qmd`
-- **AI use:** built with help from Claude (Anthropic); I reviewed and
-  edited all content and code
+- `agent.py`: tools, the agent loop, the scripted stand-in for the LLM
+  (`ReplayLLM`), and helpers for the demos
+- `player.tpl`, `ci.tpl`: HTML and JavaScript for the in-slide demos
+- `make_data.py`: simulated prices and the scripted traces (fixed seed)
+- `record.py` (optional): records a real model run into
+  `data/traces.json`; needs `ANTHROPIC_API_KEY` and never runs during
+  rendering
+- **AI use:** Claude (Anthropic) helped draft the slide text, wrote first
+  versions of the Python (`agent.py`, `make_data.py`, `record.py`) and
+  the HTML and JavaScript demos, and suggested the layout. I chose the
+  topic and example, revised the content after review, checked the
+  returns, winner, and gap against pandas, and tested the demos and
+  sliders in a browser.
