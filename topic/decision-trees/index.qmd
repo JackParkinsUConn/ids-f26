@@ -1,0 +1,482 @@
+---
+title: "Decision Trees"
+subtitle: "Introduction to Data Science | Fall 2026"
+author: "Mahiba Mansur"
+format:
+  revealjs:
+    width: 1280
+    height: 720
+    slide-number: true
+    preview-links: auto
+    theme: default
+    incremental: false
+    fig-format: svg
+bibliography: references.bib
+jupyter: python3
+---
+
+## About the author
+
+**Mahiba Mansur**
+
+- Topic contributor to the Fall 2026 Introduction to Data Science notes.
+- This presentation introduces decision trees through a study-hours example
+  and a classification problem using NYC 311 requests.
+
+## Why decision trees?
+
+A decision tree is used to make predictions or classify information by
+breaking a problem down into a sequence of simple questions
+[@breiman1984classification; @scikitlearnnddecision].
+
+- Decision trees learn rules from labeled examples.
+- They make predictions by asking a sequence of questions.
+- Their paths are relatively easy to interpret.
+
+- **Classification:** predict a categorical outcome
+- **Regression:** predict a numeric outcome
+
+
+## How Does a Tree Work?
+
+- **Root node:** the first question, which splits the full training data.
+- **Branch:** a line connecting nodes, representing a question's outcome.
+- **Internal node:** a decision point between the root and leaves.
+- **Leaf:** a terminal node that supplies a prediction.
+
+## Example
+
+```text
+                 [ What is the weather? ]  <-- Root Node
+                 /         |           \
+                /          |            \
+          ( Sunny )     ( Cloudy )     ( Rainy )  <-- Branches
+            /               |             \
+           /                |              \
+   [ Is humidity high? ]  [Hiking]       [Stay Inside] <-- Leaf Nodes
+       /          \
+      /            \
+  ( High )      ( Normal )
+     /              \
+    /                \
+[Swimming]         [Hiking]  <-- Leaf Nodes
+
+```
+
+
+## How does a tree choose a split?
+
+The **Gini impurity** measures the mixture of classes in a node
+[@breiman1984classification]:
+
+$$
+G = 1 - \sum_{k=1}^{K} p_k^2,
+$$
+
+where $G$ is the node's impurity, $K$ is the number of outcome classes,
+and $p_k$ is the proportion of observations in class $k$.
+
+
+- $G = 0$: the node contains one class only.
+- Larger $G$: the classes are more mixed (more impure)
+- The algorithm searches for a split that reduces impurity.
+
+## Compare candidate splits
+
+A binary split's weighted impurity is
+
+$$
+G_{\mathrm{split}} = \frac{n_L}{n} G_L
+                      + \frac{n_R}{n} G_R,
+$$
+
+where $n_L$ and $n_R$ are the numbers of observations in the left and
+right child nodes, $n=n_L+n_R$ is the parent count, and $G_L$ and $G_R$
+are the child-node impurities.
+
+The impurity reduction is
+
+$$
+\Delta G = G_{\mathrm{parent}} - G_{\mathrm{split}},
+$$
+
+where $G_{\mathrm{parent}}$ is the parent's impurity and $\Delta G$
+is the decrease produced by the split.
+
+## Choose a split
+
+At each node, the algorithm [@scikitlearnnddecision]:
+
+1. Considers candidate features and split thresholds.
+2. Measures how much each split reduces impurity.
+3. Chooses the best available split.
+
+For scikit-learn's binary trees, categorical predictors are first encoded
+as numerical indicators. The search is greedy: it does not optimize all
+future splits at once.
+
+
+## An Example
+
+| Study hours | Practice quizzes | Result |
+|---:|---:|---|
+| 1 | 0 | Fail |
+| 1 | 1 | Fail |
+| 2 | 0 | Fail |
+| 2 | 1 | Fail |
+| 3 | 0 | Pass |
+| 3 | 1 | Pass |
+| 4 | 0 | Pass |
+| 4 | 1 | Pass |
+
+In this dataset, study hours perfectly separate the two classes.
+
+## Prepare the small example
+
+```{python}
+X = [
+    [1, 0], [1, 1],
+    [2, 0], [2, 1],
+    [3, 0], [3, 1],
+    [4, 0], [4, 1]
+]
+
+y = [
+    "Fail", "Fail",
+    "Fail", "Fail",
+    "Pass", "Pass",
+    "Pass", "Pass"
+]
+```
+
+## Train a decision tree
+
+```{python}
+from sklearn.tree import DecisionTreeClassifier, export_text
+
+model = DecisionTreeClassifier(max_depth=2, random_state=2026)
+
+model.fit(X, y);
+```
+
+## Read the learned rule
+
+```{python}
+print(export_text(
+    model,
+    feature_names=["study_hours", "practice_quizzes"]
+))
+```
+
+## Interpretation
+
+```{python}
+prediction = model.predict([[4, 0]])[0]
+print("Prediction:", prediction)
+```
+
+The student studied four hours, which exceeds the learned threshold of
+2.5 hours, so the model predicts a pass. This is a simulated example,
+not evidence that studying four hours guarantees passing.
+
+## Example: NYC 311
+
+**Question:** Can a small decision tree classify whether an NYPD-directed
+311 request is an **Illegal Parking** request?
+
+The request records come from NYC Open Data [@nycnd311]. We use the shared
+course extract, with requests created from September 6, 2026, through
+September 13 at 07:59, in New York local time.
+
+Predictors available when the request was created:
+
+- hour of creation;
+- day of week;
+- open-data channel;
+- borough and location type.
+
+The complaint label and closure information are not used as predictors.
+
+## Load the shared data
+
+```{python}
+import pandas as pd
+
+base_url = "https://github.com/statds/ids-book/raw/refs/heads/main/data/"
+url = base_url + "311_nypd_lbdwk_2026.csv.zip"
+d = pd.read_csv(
+    url, compression="zip",
+    dtype={"Unique Key": "string", "Incident Zip": "string"},
+)
+```
+
+The archive is read directly from the published book repository; no local
+copy is required.
+
+## Prepare the creation time
+
+```{python}
+d["created_at"] = pd.to_datetime(
+    d["Created Date"], format="%m/%d/%Y %I:%M:%S %p", errors="coerce"
+)
+missing_dates = d["created_at"].isna().sum()
+model_data = d.dropna(
+    subset=["created_at", "Problem (formerly Complaint Type)"]
+).copy()
+```
+
+Dates are parsed explicitly. Missing creation times or complaint labels
+are excluded; missing categorical predictors receive a separate label.
+
+## Define the outcome and predictors
+
+```{python}
+model_data["illegal_parking"] = model_data[
+    "Problem (formerly Complaint Type)"
+].eq("Illegal Parking").astype(int)
+model_data["hour"] = model_data["created_at"].dt.hour
+model_data["day_of_week"] = model_data["created_at"].dt.day_name()
+for short, original in {
+    "channel": "Open Data Channel Type",
+    "borough": "Borough", "location_type": "Location Type",
+}.items():
+    model_data[short] = model_data[original].fillna("Missing")
+```
+
+## Check the analysis sample
+
+```{python}
+#| echo: false
+#| output: asis
+print(f"- Loaded **{len(d):,}** requests; excluded "
+      f"**{len(d) - len(model_data):,}** for missing dates or labels.")
+print(f"- Illegal Parking: **{model_data.illegal_parking.sum():,}** "
+      f"(**{model_data.illegal_parking.mean():.1%}**).")
+print(f"- Created from **{model_data.created_at.min():%b %d, %Y %H:%M}** "
+      f"through **{model_data.created_at.max():%b %d, %Y %H:%M}**.")
+```
+
+Each row is one request. These counts describe this fixed extract rather
+than the full NYC 311 service.
+
+## Hold out test requests
+
+```{python}
+from sklearn.model_selection import train_test_split
+
+features = ["hour", "day_of_week", "channel", "borough", "location_type"]
+X = model_data[features]
+y = model_data["illegal_parking"]
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=2026, stratify=y
+)
+```
+
+We reserve 25% for testing and preserve the outcome proportions. This
+random split assesses requests within the observed period; it does not
+establish performance on a later week.
+
+## Encode the categorical predictors
+
+```{python}
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+
+categorical = ["day_of_week", "channel", "borough", "location_type"]
+encoder = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
+preprocessor = ColumnTransformer([
+    ("numeric", "passthrough", ["hour"]),
+    ("categorical", encoder, categorical),
+], verbose_feature_names_out=False)
+```
+
+One-hot encoding creates a numerical indicator for each category. The
+encoder is fitted on training data as part of the pipeline.
+
+## Fit a small tree
+
+```{python}
+from sklearn.pipeline import Pipeline
+
+model = Pipeline([
+    ("pre", preprocessor),
+    ("tree", DecisionTreeClassifier(
+        max_depth=3, criterion="gini", random_state=2026
+    )),
+])
+model.fit(X_train, y_train);
+```
+
+The depth limit keeps the fitted rules small enough to inspect
+[@scikitlearnnddecision].
+
+## The learned tree
+
+```{python}
+#| echo: false
+#| fig-width: 14
+#| fig-height: 5.2
+#| fig-alt: "The fitted depth-three classification tree uses creation-time \
+#| features to separate Illegal Parking requests from other NYPD requests."
+import matplotlib.pyplot as plt
+from sklearn.tree import plot_tree
+
+feature_names = model.named_steps["pre"].get_feature_names_out()
+fig, ax = plt.subplots(figsize=(14, 5.2))
+plot_tree(
+    model.named_steps["tree"], feature_names=feature_names,
+    class_names=["Other", "Illegal Parking"], filled=True,
+    rounded=True, impurity=False, proportion=True, fontsize=9, ax=ax,
+)
+plt.show()
+```
+
+The `value` pair gives the proportions [Other, Illegal Parking] in each
+node. `samples` gives its share of the training requests.
+
+## Trace a prediction
+
+```{python}
+#| echo: false
+#| output: asis
+# Inspect the first held-out request predicted to be Illegal Parking.
+predictions = model.predict(X_test)
+example = X_test.loc[predictions == 1].iloc[[0]]
+encoded = model.named_steps["pre"].transform(example)
+encoded_row = encoded[0]
+tree = model.named_steps["tree"].tree_
+path = model.named_steps["tree"].decision_path(encoded).indices
+print("The following conditions hold for one held-out request:\n")
+for node in path:
+    if tree.children_left[node] != tree.children_right[node]:
+        feature = tree.feature[node]
+        operator = "≤" if encoded_row[feature] <= tree.threshold[node] else ">"
+        print(f"- `{feature_names[feature]}` {operator} "
+              f"{tree.threshold[node]:.1f}")
+print("\nThe model predicts **Illegal Parking** for this request.")
+```
+
+The rule describes an association in this fitted model. It does not show
+that a channel, location, or creation time causes the complaint type.
+
+## Compute test-set performance
+
+```{python}
+from sklearn.dummy import DummyClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+
+baseline = DummyClassifier(strategy="most_frequent").fit(X_train, y_train)
+baseline_accuracy = accuracy_score(y_test, baseline.predict(X_test))
+tree_accuracy = accuracy_score(y_test, predictions)
+precision = precision_score(y_test, predictions, zero_division=0)
+recall = recall_score(y_test, predictions, zero_division=0)
+```
+
+The positive class is Illegal Parking. Precision measures the share of
+positive predictions that are correct; recall measures the share of actual
+positive cases detected [@scikitlearnndmetrics].
+
+## How well did it classify?
+
+```{python}
+#| echo: false
+#| output: asis
+print("| Metric | Test-set result |")
+print("|:--|--:|")
+for name, value in [
+    ("Majority-class baseline", baseline_accuracy),
+    ("Tree accuracy", tree_accuracy),
+    ("Precision", precision), ("Recall", recall),
+]:
+    print(f"| {name} | {value:.1%} |")
+```
+
+The tree improves on the majority baseline, but many Illegal Parking
+requests are still missed.
+
+## Accuracy is not the whole story
+
+```{python}
+#| echo: false
+#| output: asis
+print(f"Only **{y_test.mean():.1%}** of the held-out requests are Illegal "
+      f"Parking. Predicting Other for every request gives "
+      f"**{baseline_accuracy:.1%}** accuracy but **zero recall**.")
+print(f"\nThe fitted tree detects **{recall:.1%}** of Illegal Parking "
+      "requests. Its accuracy alone hides the missed positive cases.")
+```
+
+Choose evaluation measures according to the purpose of the predictions.
+
+## What changes with tree depth?
+
+Possible values for `max_depth` include 2, 3, 5, and `None` (unlimited).
+This changes the fitted model; merely assigning a variable does not refit it.
+
+Results:
+
+- **Shallow tree:** simpler, less flexible
+- **Deeper tree:** more flexible, harder to explain
+- **Very deep tree:** higher risk of overfitting
+
+The goal is not “the deepest tree possible.” The goal is enough complexity to
+capture useful structure without losing generalization or interpretability.
+
+## Overfitting and instability
+
+**1. Overfitting**
+The tree grows too complex and memorizes the training data instead of learning
+the general pattern.
+
+**2. High Variance and Instability**
+A small change in training data can change the tree's structure and splits.
+
+## Greedy search and computational cost
+
+**3. Greedy Algorithm Shortcomings**
+The algorithm makes the best local choice at each split without looking
+ahead. It does not guarantee a globally optimal tree
+[@breiman1984classification; @scikitlearnnddecision].
+
+**4. Computational Cost**
+Growing, sorting candidate split fields, and pruning large trees can become
+slow and expensive, especially with massive datasets.
+
+## Decision trees vs. other models
+
+| Method | Strength | Trade-off |
+|---|---|---|
+| Decision tree | Easy to explain as rules | Can be unstable / overfit |
+| Logistic regression | Compact coefficients | Linear in chosen features |
+| Random forest | Usually stronger predictive performance | Less transparent |
+| Gradient boosting | Powerful predictive model | More tuning + less simple |
+
+## Takeaways
+
+1. **Trees turn predictors into a sequence of if/then decisions.**
+2. **Gini impurity** measures how mixed a node is; splits seek more homogeneous
+children.
+3. **Depth and leaf-size constraints** help control overfitting.
+4. **Accuracy is not enough** when classes are imbalanced.
+5. **A predictive split is not a causal explanation.**
+
+## Further reading
+
+The original contribution also listed these introductory discussions of
+limitations [@edurekanddisadvantages; @geeksforgeeks2025limitations].
+The course example uses the scikit-learn documentation for implementation
+and evaluation details.
+
+## Revision disclosure
+
+- **Original contribution:** Mahiba Mansur's decision-tree explanations
+  and examples.
+- **Instructor revisions:** prepared with OpenAI Codex to repair execution,
+  notation, citations, slide organization, and generated output; results
+  were recomputed and the slides rendered.
+- The original submission did not state whether the student used AI tools.
+
+## References
+
+::: {#refs}
+:::

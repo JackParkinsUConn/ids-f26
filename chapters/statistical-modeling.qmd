@@ -3,4 +3,10 @@
 Student presentations in this chapter concern statistical reasoning,
 prediction, dimension reduction, clustering, and supervised learning.
 
-Presentations will be added during the semester.
+| Presentation | Presenter | Description |
+|:--|:--|:--|
+| [Decision Trees](../topic/decision-trees/) | Mahiba Mansur | Classification. |
+
+The decision-tree presentation fits a small classifier using request fields
+available at creation, compares it with a majority baseline, and explains
+why accuracy alone can hide missed Illegal Parking requests.

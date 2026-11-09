@@ -11,9 +11,11 @@ book:
   author:
     - name: Jun Yan
       url: https://statcomp.org
+    - name: Erik Chervonny
+    - name: Mahiba Mansur
     - name: Amanda Noe
     - name: Enrico Ong
-    - name: Erik Chervonny
+    - name: Chaoyang Wang
   date: today
   chapters:
     - index.qmd

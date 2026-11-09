@@ -3,17 +3,22 @@
 Student presentations in this chapter concern advanced computational methods,
 deep learning, natural-language processing, and artificial intelligence.
 
-+-----------------------+--------------+--------------------------------------+
-| Presentation          | Presenter    | Description                          |
-+=======================+==============+======================================+
-| [LLM Agents][parkins] | Jack Parkins | Explains how an LLM agent answers a  |
-|                       |              | data question by calling tools in a  |
-|                       |              | loop, using a scripted teaching      |
-|                       |              | example (pre-written model turns,    |
-|                       |              | real tools) on simulated stock data. |
-|                       |              | Covers failure modes and how to      |
-|                       |              | evaluate an agent with a binomial    |
-|                       |              | model and Wilson intervals.          |
-+-----------------------+--------------+--------------------------------------+
+## Introduction to Neural Networks
 
-[parkins]: ../topic/parkins-llm-agents/
+[Presentation](../topic/chaoyang-presentation/) by **Chaoyang Wang**.
+
+Introduces neurons, nonlinear activations, forward prediction, and
+gradient-based training through a small binary-classification example.
+A reproducible two-moons analysis connects the equations to Python and
+compares a neural network with a straight-line classifier on held-out data.
+The presentation closes with limitations and practical takeaways.
+
+## LLM Agents
+
+[Presentation](../topic/parkins-llm-agents/) by **Jack Parkins**.
+
+Explains how a large language model (LLM) agent answers a data question by
+calling tools in a loop. A scripted teaching example (pre-written model turns,
+real tools) on simulated stock data steps through the loop, checks the answer
+with pandas, and shows common failure modes. The presentation closes with how
+to evaluate an agent using a binomial model and Wilson intervals.

@@ -483,12 +483,12 @@ accepted.
 | 11/11 | Distefano, Cristian | [topic] |
 | 11/11 | Nair, Pardhip | [topic] |
 | 11/11 | Morissette, Carter | [topic] |
-| 11/16 | Maras, Ruveyda | [topic] |
-| 11/16 | Wang, Leo | [topic] |
+| 11/16 | Maras, Ruveyda | False-discovery-rate control |
+| 11/16 | Wang, Leo | Agent Skills for Data Science |
 | 11/16 | Choudhury, Ruhama | Deep Learning |
-| 11/18 | Hartman, Mikaela | [topic] |
+| 11/18 | Hartman, Mikaela | Multidimensional Scaling |
 | 11/18 | Kiani, Ismail | [topic] |
-| 11/18 | Kelly, Daniel | [topic] |
+| 11/18 | Kelly, Daniel | Multiple Imputation for Missing Data |
 
 ### Final Project Presentation Schedule
 

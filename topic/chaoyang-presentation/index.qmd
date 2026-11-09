@@ -1,0 +1,1096 @@
+---
+title: "Introduction to Neural Networks"
+subtitle: "How a small network learns to classify data"
+author: "Chaoyang Wang"
+format:
+  revealjs:
+    width: 1280
+    height: 720
+    slide-number: true
+    preview-links: auto
+    theme: default
+    incremental: false
+    html-math-method: katex
+    fig-format: svg
+jupyter: python3
+bibliography: references.bib
+link-citations: true
+---
+
+## About me
+
+**Chaoyang Wang**
+
+- **Background:** PhD student in Statistics.
+- **Interests:** deep learning and its applications in finance.
+- **Why this topic?** Neural networks provide a starting point for
+  understanding deep learning.
+
+
+## What is a neural network?
+
+A neural network is a machine learning model built from layers of
+connected computational units called **neurons**
+[@ibm-nn; @visionbook].
+
+- **Inputs:** the numerical features supplied to the model.
+- **Hidden layers:** calculations that combine and transform the inputs.
+- **Output:** the model's prediction.
+
+Training adjusts numerical parameters called **weights** and **biases**.
+
+
+## Applications and motivation {.smaller}
+
+:::: {.columns}
+
+::: {.column width="43%"}
+**Examples**
+
+| Application | Class 1 |
+|:--|:--|
+| Email filtering | Spam |
+| Cat-versus-dog images | Cat |
+
+Each observation is represented by numerical inputs.
+:::
+
+::: {.column width="53%"}
+**Binary classification**
+
+$$
+\hat{p} = f_{\boldsymbol{\theta}}(\mathbf{x}),
+$$
+
+where $\mathbf{x}$ is the input feature vector, $\boldsymbol{\theta}$
+contains the learned weights and biases, $f_{\boldsymbol{\theta}}$ is the
+network function, and $\hat{p}$ is the estimated probability of class 1.
+:::
+
+::::
+
+**Why use one?** A network can learn nonlinear relationships between
+inputs and outcomes [@ibm-nn; @visionbook].
+
+## Our example: two moons {.smaller}
+
+:::: {.columns}
+
+::: {.column width="57%"}
+
+```{python}
+#| label: plot-two-moons
+#| echo: false
+#| fig-width: 7
+#| fig-height: 4.6
+#| out-width: "100%"
+#| fig-align: center
+#| fig-alt: "Blue circles (class 0) and orange triangles (class 1)."
+
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_moons
+
+features, labels = make_moons(
+    n_samples=200,
+    noise=0.15,
+    random_state=2026,
+)
+
+fig, ax = plt.subplots(figsize=(7, 4.6))
+class_styles = ((0, "#0072B2", "o"), (1, "#D55E00", "^"))
+
+for class_label, color, marker in class_styles:
+    is_class = labels == class_label
+    ax.scatter(
+        features[is_class, 0],
+        features[is_class, 1],
+        color=color,
+        marker=marker,
+        label=f"Class {class_label}",
+        s=38,
+        alpha=0.85,
+        edgecolors="white",
+        linewidths=0.4,
+    )
+
+ax.set_xlabel(r"Input 1: $x_{i1}$", fontsize=14)
+ax.set_ylabel(r"Input 2: $x_{i2}$", fontsize=14)
+ax.tick_params(labelsize=12)
+ax.set_aspect("equal", adjustable="box")
+ax.legend(frameon=False, loc="upper right", fontsize=12)
+ax.grid(alpha=0.15)
+fig.tight_layout()
+plt.show()
+```
+
+:::
+
+::: {.column width="39%"}
+
+### One observation
+
+$$
+\mathbf{x}_i =
+\begin{bmatrix}
+x_{i1} \\
+x_{i2}
+\end{bmatrix},
+$$
+
+where $i=1,\ldots,200$ indexes the points and $x_{i1},x_{i2}$ are
+the two inputs. The known class label is $y_i\in\{0,1\}$.
+
+:::
+
+::::
+
+**Data:** generated with scikit-learn's `make_moons`
+[@sklearn-data].
+
+**Question:** Can a straight-line boundary capture this pattern?
+
+## A straight-line classifier {.smaller}
+
+:::: {.columns}
+
+::: {.column width="62%"}
+
+```{python}
+#| label: plot-linear-classifier
+#| echo: false
+#| fig-width: 7
+#| fig-height: 4.6
+#| out-width: "100%"
+#| fig-align: center
+#| fig-alt: "Training points and a straight decision boundary."
+
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+# Reuse the two-moons data and reserve 50 points for evaluation.
+train_features, test_features, train_labels, test_labels = train_test_split(
+    features,
+    labels,
+    test_size=0.25,
+    stratify=labels,
+    random_state=2026,
+)
+
+linear_model = LogisticRegression(max_iter=1000)
+linear_model.fit(train_features, train_labels)
+
+# Evaluate the fitted model across a grid of input coordinates.
+horizontal = np.linspace(
+    train_features[:, 0].min() - 0.3,
+    train_features[:, 0].max() + 0.3,
+    250,
+)
+vertical = np.linspace(
+    train_features[:, 1].min() - 0.3,
+    train_features[:, 1].max() + 0.3,
+    250,
+)
+grid_x, grid_y = np.meshgrid(horizontal, vertical)
+grid_features = np.column_stack((grid_x.ravel(), grid_y.ravel()))
+grid_scores = linear_model.decision_function(grid_features).reshape(
+    grid_x.shape
+)
+
+fig, ax = plt.subplots(figsize=(7, 4.6))
+
+# Background colors show the predicted classes.
+ax.contourf(
+    grid_x,
+    grid_y,
+    (grid_scores > 0).astype(int),
+    levels=[-0.5, 0.5, 1.5],
+    colors=["#0072B2", "#D55E00"],
+    alpha=0.08,
+)
+
+# Draw the boundary where the predicted class changes.
+boundary = ax.contour(
+    grid_x,
+    grid_y,
+    grid_scores,
+    levels=[0],
+    colors="black",
+    linewidths=2,
+)
+
+class_styles = ((0, "#0072B2", "o"), (1, "#D55E00", "^"))
+
+for class_label, color, marker in class_styles:
+    is_class = train_labels == class_label
+    ax.scatter(
+        train_features[is_class, 0],
+        train_features[is_class, 1],
+        color=color,
+        marker=marker,
+        label=f"Class {class_label}",
+        s=38,
+        alpha=0.85,
+        edgecolors="white",
+        linewidths=0.4,
+    )
+
+ax.set_xlabel(r"Input 1: $x_{i1}$", fontsize=14)
+ax.set_ylabel(r"Input 2: $x_{i2}$", fontsize=14)
+ax.tick_params(labelsize=12)
+ax.set_aspect("equal", adjustable="box")
+ax.legend(frameon=False, loc="upper right", fontsize=12)
+ax.grid(alpha=0.15)
+fig.tight_layout()
+plt.show()
+```
+
+**Next:** neurons → activation functions → 8 neurons in one hidden layer.
+
+:::
+
+::: {.column width="34%"}
+
+**Reading the plot**
+
+- **Line:** logistic regression's boundary [@sklearn-linear].
+- **Background:** predicted classes.
+- **Points:** known class labels.
+
+**A straight boundary misses the curved pattern.**
+
+**Model connection**
+
+Logistic regression can be viewed as a neural network with
+**no hidden layer** [@cs231n-architecture].
+
+:::
+
+::::
+
+
+
+## One neuron {.smaller}
+
+```{python}
+#| label: plot-one-neuron
+#| echo: false
+#| fig-width: 10
+#| fig-height: 2.3
+#| out-width: 90%
+#| fig-align: center
+#| fig-alt: "Two weighted inputs enter a sum, activation, and output."
+
+from matplotlib.patches import FancyArrowPatch, Rectangle
+
+figure, axis = plt.subplots(figsize=(10, 2.3))
+axis.set_xlim(0, 10)
+axis.set_ylim(0, 2.3)
+axis.axis("off")
+
+axis.add_patch(
+    Rectangle((2.7, 0.25), 4.7, 1.8, facecolor="#f2f4f7", edgecolor="#777")
+)
+axis.text(5.05, 1.86, "One neuron", ha="center", fontsize=13)
+
+neuron_nodes = [
+    (0.8, 1.6, 1.1, r"$x_{i1}$"),
+    (0.8, 0.6, 1.1, r"$x_{i2}$"),
+    (3.85, 1.1, 1.7, "Sum + bias b"),
+    (6.15, 1.1, 1.7, "Activation g"),
+    (9.0, 1.1, 1.1, r"$a_i$"),
+]
+for center_x, center_y, width, text in neuron_nodes:
+    axis.add_patch(
+        Rectangle(
+            (center_x - width / 2, center_y - 0.3),
+            width,
+            0.6,
+            facecolor="#eaf0fc",
+            edgecolor="#555",
+        )
+    )
+    axis.text(center_x, center_y, text, ha="center", va="center", fontsize=13)
+
+neuron_edges = [
+    ((1.35, 1.6), (3.0, 1.25), (2.15, 1.65), r"$w_1$"),
+    ((1.35, 0.6), (3.0, 0.95), (2.15, 0.55), r"$w_2$"),
+    ((4.7, 1.1), (5.3, 1.1), (5.0, 1.35), r"$z_i$"),
+    ((7.0, 1.1), (8.45, 1.1), (7.72, 1.35), "output"),
+]
+for start, end, label_position, text in neuron_edges:
+    axis.add_patch(
+        FancyArrowPatch(
+            start, end, arrowstyle="-|>", mutation_scale=12, color="#555"
+        )
+    )
+    axis.text(*label_position, text, ha="center", fontsize=12)
+
+figure.tight_layout(pad=0.2)
+plt.show()
+```
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+**1. Combine the inputs**
+
+$$
+z_i = b + w_1x_{i1} + w_2x_{i2},
+$$
+
+where $z_i$ is the score before activation, $b$ is the bias,
+$w_1,w_2$ are the weights, and $x_{i1},x_{i2}$ are the inputs for
+observation $i$.
+
+:::
+
+::: {.column width="48%"}
+
+**2. Apply an activation**
+
+$$
+a_i = g(z_i),
+$$
+
+where $g$ is the activation function and $a_i$ is the output
+after applying it to $z_i$.
+
+:::
+
+::::
+
+**Logistic regression:** $g=\sigma$ gives $a_i=\hat{p}_i$,
+with **no hidden layer** [@cs231n-architecture].
+
+
+
+## Activation functions {.smaller}
+
+```{python}
+#| label: plot-activation-functions
+#| echo: false
+#| fig-width: 11
+#| fig-height: 2.4
+#| out-width: "90%"
+#| fig-align: center
+#| fig-alt: "Sigmoid and ReLU outputs versus their input scores."
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+activation_scores = np.linspace(-6.0, 6.0, 401)
+sigmoid_values = 1.0 / (1.0 + np.exp(-activation_scores))
+relu_values = np.maximum(0.0, activation_scores)
+
+fig, axes = plt.subplots(1, 2, figsize=(11, 2.4))
+
+axes[0].plot(
+    activation_scores,
+    sigmoid_values,
+    color="#0072B2",
+    linewidth=3,
+)
+axes[0].scatter([0], [0.5], color="#0072B2", s=35, zorder=3)
+axes[0].set_title("Sigmoid", fontsize=16)
+axes[0].set_ylim(-0.08, 1.08)
+axes[0].set_yticks([0, 0.5, 1])
+
+axes[1].plot(
+    activation_scores,
+    relu_values,
+    color="#D55E00",
+    linewidth=3,
+)
+axes[1].scatter([0], [0], color="#D55E00", s=35, zorder=3)
+axes[1].set_title("ReLU", fontsize=16)
+axes[1].set_ylim(-0.4, 6.4)
+axes[1].set_yticks([0, 3, 6])
+
+for ax in axes:
+    ax.axvline(
+        0,
+        color="gray",
+        linewidth=0.8,
+        linestyle="--",
+        alpha=0.6,
+    )
+    ax.axhline(
+        0,
+        color="gray",
+        linewidth=0.8,
+        linestyle="--",
+        alpha=0.6,
+    )
+    ax.set_xlim(-6, 6)
+    ax.set_xticks([-6, -3, 0, 3, 6])
+    ax.set_xlabel(r"Score $z$", fontsize=14)
+    ax.set_ylabel(r"Output $g(z)$", fontsize=14)
+    ax.tick_params(labelsize=12)
+    ax.grid(alpha=0.15)
+
+fig.tight_layout(w_pad=3)
+plt.show()
+```
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+$$
+\sigma(z)=\frac{1}{1+e^{-z}}.
+$$
+
+Outputs a value between 0 and 1.
+**Both models:** estimate the probability of class 1 at the output.
+
+:::
+
+::: {.column width="48%"}
+
+$$
+\operatorname{ReLU}(z)=\max(0,z).
+$$
+
+Zero if $z\le0$; otherwise, $z$.
+**Our network:** transform hidden-neuron scores.
+
+:::
+
+::::
+
+**Nonlinear hidden neurons add flexibility before the sigmoid output**
+[@visionbook; @sklearn-nn].
+
+
+
+## A complete neural network {.smaller}
+
+```{python}
+#| label: plot-complete-network
+#| echo: false
+#| fig-width: 10
+#| fig-height: 1.5
+#| out-width: 90%
+#| fig-align: center
+#| fig-alt: "Two inputs flow to eight ReLU neurons, then one sigmoid output."
+
+figure, axis = plt.subplots(figsize=(10, 1.5))
+axis.set_xlim(0, 10)
+axis.set_ylim(0, 1.5)
+axis.axis("off")
+
+layer_nodes = [
+    (1.65, "Input layer\n2 coordinates"),
+    (5.0, "Added hidden layer\n8 ReLU neurons"),
+    (8.35, "Output layer\n1 sigmoid neuron"),
+]
+for center_x, text in layer_nodes:
+    axis.add_patch(
+        Rectangle(
+            (center_x - 1.35, 0.25),
+            2.7,
+            1.0,
+            facecolor="#eaf0fc",
+            edgecolor="#555",
+        )
+    )
+    axis.text(center_x, 0.75, text, ha="center", va="center", fontsize=13)
+
+for start_x, end_x in ((3.0, 3.65), (6.35, 7.0)):
+    axis.add_patch(
+        FancyArrowPatch(
+            (start_x, 0.75),
+            (end_x, 0.75),
+            arrowstyle="-|>",
+            mutation_scale=15,
+            color="#555",
+        )
+    )
+
+figure.tight_layout(pad=0.2)
+plt.show()
+```
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+**Hidden layer**, $j=1,\ldots,8$
+
+$$
+h_{ij}=\operatorname{ReLU}\left(
+b_j+w_{j1}x_{i1}+w_{j2}x_{i2}
+\right),
+$$
+
+where $h_{ij}$ is hidden neuron $j$'s output for observation $i$,
+$w_{j1},w_{j2}$ are its input weights, and $b_j$ is its bias.
+
+:::
+
+::: {.column width="48%"}
+
+**Output layer**
+
+$$
+\hat{p}_i=\sigma\left(
+c+v_1h_{i1}+\cdots+v_8h_{i8}
+\right),
+$$
+
+where $v_1,\ldots,v_8$ are the output weights, $c$ is the bias,
+$\sigma$ is sigmoid, and $\hat{p}_i$ is the estimated probability of
+class 1.
+
+:::
+
+::::
+
+**Our forward pass:** inputs → ReLU hidden features → sigmoid probability
+[@sklearn-nn; @sklearn-mlp].
+
+
+## A numerical forward pass {.smaller}
+
+```{python}
+#| label: numerical-forward-pass
+#| include: false
+
+import numpy as np
+
+# Illustrative parameters chosen for easy arithmetic.
+demo_input = np.array([1.0, 0.5])
+demo_hidden_weights = np.array(
+    [
+        [1.0, -2.0],
+        [-1.0, 1.0],
+        [1.0, 0.0],
+        [0.0, 2.0],
+        [-1.0, 0.0],
+        [0.0, -2.0],
+        [1.0, 1.0],
+        [-1.0, 2.0],
+    ]
+)
+demo_hidden_biases = np.array(
+    [0.5, 0.25, 0.0, 0.0, 0.0, 0.5, -1.0, 0.0]
+)
+demo_output_weights = np.array(
+    [1.0, -1.0, 0.5, -0.5, 1.0, -1.0, 1.0, 1.0]
+)
+demo_output_bias = 0.0
+
+# Compute all eight hidden outputs and the final probability.
+demo_hidden_scores = (
+    demo_hidden_weights @ demo_input + demo_hidden_biases
+)
+demo_hidden_outputs = np.maximum(0.0, demo_hidden_scores)
+demo_output_score = float(
+    demo_output_bias + demo_output_weights @ demo_hidden_outputs
+)
+demo_probability = 1.0 / (1.0 + np.exp(-demo_output_score))
+```
+
+**Input:** $(x_{i1},x_{i2})=(1,0.5)$.
+Weights and biases are **manually chosen for demonstration**.
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+**1. Two hidden neurons**
+
+$z_{ij}$: score before ReLU; $h_{ij}$: output after ReLU
+[@visionbook].
+
+$$
+\begin{aligned}
+z_{i1} &= 0.5+1\cdot1-2\cdot0.5=0.5,\\
+h_{i1} &= \max(0,0.5)=0.5,\\
+z_{i2} &= 0.25-1\cdot1+1\cdot0.5=-0.25,\\
+h_{i2} &= \max(0,-0.25)=0.
+\end{aligned}
+$$
+
+:::
+
+::: {.column width="48%"}
+
+**2. Output score before sigmoid**
+
+Hidden outputs:
+$(0.5,0,1,1,0,0,0.5,0)$.
+
+Chosen output weights $(v_1,\ldots,v_8)=$
+$(1,-1,0.5,-0.5,1,-1,1,1)$; output bias $c=0$.
+
+$$
+\begin{aligned}
+s_i &= c+\sum_{j=1}^{8}v_jh_{ij}\\
+    &= 1\cdot0.5+0.5\cdot1\\
+    &\quad -0.5\cdot1+1\cdot0.5=1.
+\end{aligned}
+$$
+
+Zero contributions are omitted in the substitution.
+
+:::
+
+::::
+
+**3. Apply sigmoid:** $\hat{p}_i=\sigma(s_i)=\sigma(1)\approx0.731$;
+**predict class 1** because $\hat{p}_i>0.5$.
+
+
+
+## Loss: binary cross-entropy {.smaller}
+
+$$
+\ell_i=-\left[
+y_i\ln(\hat{p}_i)+(1-y_i)\ln(1-\hat{p}_i)
+\right],
+$$
+
+:::: {.columns}
+
+::: {.column width="44%"}
+
+where $y_i$ is the true class (0 or 1), $\hat{p}_i$ is the estimated
+probability of class 1, $\ell_i$ is the loss for observation $i$, and
+$\ln$ is the natural logarithm with base $e$ [@sklearn-metrics].
+
+**Smaller loss is better.**
+
+:::
+
+::: {.column width="52%"}
+
+**Our worked example**
+
+Assume $y_i=1$, with $\hat{p}_i\approx0.731$ from the forward pass:
+
+$$
+\ell_i=-\ln(0.731)\approx0.313.
+$$
+
+**Keep $y_i=1$ and compare:**
+
+```{python}
+#| label: loss-example-comparison
+#| echo: false
+#| output: asis
+
+import numpy as np
+
+# Assume class 1 for the illustrative observation.
+demo_true_label = 1
+
+loss_probabilities = np.array([0.1, demo_probability, 0.9])
+loss_values = -(
+    demo_true_label * np.log(loss_probabilities)
+    + (1 - demo_true_label) * np.log(1 - loss_probabilities)
+)
+
+print(r"| $\hat{p}_i$ | Loss $\ell_i$ |")
+print("|---:|---:|")
+
+for loss_probability, loss_value in zip(loss_probabilities, loss_values):
+    print(f"| {loss_probability:.3f} | {loss_value:.3f} |")
+```
+
+:::
+
+::::
+
+**Training goal:** reduce the average loss on the training observations.
+
+
+## How training works {.smaller}
+
+:::: {.columns}
+
+::: {.column width="60%"}
+
+```{python}
+#| label: plot-gradient-descent
+#| echo: false
+#| fig-width: 7
+#| fig-height: 3.8
+#| out-width: "100%"
+#| fig-alt: "Weight updates descend an illustrative loss curve."
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# A hypothetical loss curve for illustrating gradient descent.
+descent_grid = np.linspace(-1.8, 4.5, 400)
+descent_curve = (descent_grid - 2.0) ** 2 + 0.2
+descent_rate = 0.2
+descent_weights = [-1.5]
+
+for _ in range(6):
+    current_weight = descent_weights[-1]
+    current_slope = 2.0 * (current_weight - 2.0)
+    next_weight = current_weight - descent_rate * current_slope
+    descent_weights.append(next_weight)
+
+descent_weights = np.array(descent_weights)
+descent_losses = (descent_weights - 2.0) ** 2 + 0.2
+
+fig, ax = plt.subplots(figsize=(7.0, 3.8))
+
+ax.plot(
+    descent_grid,
+    descent_curve,
+    color="#0072B2",
+    linewidth=2.5,
+)
+ax.scatter(
+    descent_weights,
+    descent_losses,
+    color="#D55E00",
+    edgecolors="white",
+    s=70,
+    zorder=3,
+)
+
+for step in range(len(descent_weights) - 1):
+    ax.annotate(
+        "",
+        xy=(descent_weights[step + 1], descent_losses[step + 1]),
+        xytext=(descent_weights[step], descent_losses[step]),
+        arrowprops={
+            "arrowstyle": "->",
+            "color": "#D55E00",
+            "lw": 1.7,
+        },
+    )
+
+ax.annotate(
+    "Start",
+    xy=(descent_weights[0], descent_losses[0]),
+    xytext=(-0.85, 12.4),
+    fontsize=13,
+    arrowprops={"arrowstyle": "-", "color": "0.4"},
+)
+ax.annotate(
+    "Negative slope: move right",
+    xy=(descent_weights[2], descent_losses[2]),
+    xytext=(0.65, 7.3),
+    fontsize=13,
+    ha="center",
+    arrowprops={"arrowstyle": "->", "color": "0.4"},
+)
+
+ax.set(
+    xlabel=r"Weight value, $w$",
+    ylabel=r"Average training loss, $L$",
+    xlim=(-1.8, 4.5),
+    ylim=(-0.4, 15.0),
+)
+ax.xaxis.label.set_size(13)
+ax.yaxis.label.set_size(13)
+ax.tick_params(labelsize=11)
+ax.spines[["top", "right"]].set_visible(False)
+ax.grid(alpha=0.15)
+
+fig.tight_layout()
+plt.show()
+```
+
+:::
+
+::: {.column width="36%"}
+
+**One weight update**
+
+$$
+w_{\text{new}}
+=
+w_{\text{old}}
+-
+\eta\,
+\underbrace{\frac{\partial L}{\partial w}}_{\text{slope}},
+$$
+
+where $w$ is one weight, $L$ is the average training loss, and
+$\eta>0$ is the learning rate controlling the step size.
+
+**Backpropagation** computes gradients; the **optimizer** uses them to
+update weights and biases [@visionbook].
+
+:::
+
+::::
+
+## Python workflow {#python-workflow .smaller}
+
+**Configured model:** scikit-learn's `MLPClassifier` [@sklearn-mlp],
+with 2 inputs → 8 ReLU neurons → 1 sigmoid output.
+
+```{python}
+#| label: configure-two-moons-network
+#| echo: true
+#| output: false
+
+from sklearn.neural_network import MLPClassifier
+
+network_model = MLPClassifier(
+    hidden_layer_sizes=(8,), activation="relu", solver="sgd",
+    batch_size=len(train_features), learning_rate="constant",
+    learning_rate_init=0.1, momentum=0.0, nesterovs_momentum=False,
+    alpha=0.0, early_stopping=False, max_iter=10000,
+    tol=1e-5, n_iter_no_change=100, random_state=2026,
+)
+```
+
+- `hidden_layer_sizes=(8,)` creates one hidden layer with eight neurons.
+- The full training batch and zero momentum match the gradient-descent
+  illustration. The learning rate is 0.1, and `alpha=0` disables the penalty.
+- The stopping controls limit training; the fixed seed makes it reproducible.
+
+## Fit and evaluate {.smaller}
+
+The configured model learns from the 150 training observations. Predictions
+and accuracy use the same 50 held-out observations as the straight-line model.
+
+```{python}
+#| label: visible-network-workflow
+#| echo: true
+#| output: false
+
+network_model.fit(train_features, train_labels)
+
+test_probabilities = network_model.predict_proba(test_features)[:, 1]
+network_test_labels = network_model.predict(test_features)
+
+network_accuracy = network_model.score(test_features, test_labels)
+```
+
+- `fit`: learn weights and biases from the training observations.
+- `predict_proba`: estimate probabilities; `[:, 1]` selects class 1.
+- `predict` and `score`: predict labels and calculate test accuracy.
+
+## Trained two-moons results {.smaller}
+
+```{python}
+#| label: two-moons-evaluation
+#| include: false
+
+# Evaluate both models on the same held-out test observations.
+linear_test_labels = linear_model.predict(test_features)
+
+network_correct = int(
+    np.count_nonzero(network_test_labels == test_labels)
+)
+linear_correct = int(
+    np.count_nonzero(linear_test_labels == test_labels)
+)
+
+test_count = len(test_labels)
+linear_accuracy = linear_correct / test_count
+
+# Predict class-1 probabilities across the grid from slide 5.
+network_grid_probability = network_model.predict_proba(
+    grid_features,
+)[:, 1].reshape(grid_x.shape)
+```
+
+:::: {.columns}
+
+::: {.column width="62%"}
+
+```{python}
+#| label: plot-trained-two-moons
+#| echo: false
+#| fig-width: 7
+#| fig-height: 4.2
+#| out-width: "100%"
+#| fig-align: center
+#| fig-alt: "Test points, learned boundary, and rings around errors."
+
+fig, ax = plt.subplots(figsize=(7.0, 4.2))
+
+# Background colors show the predicted classes.
+ax.contourf(
+    grid_x,
+    grid_y,
+    (network_grid_probability > 0.5).astype(int),
+    levels=[-0.5, 0.5, 1.5],
+    colors=["#0072B2", "#D55E00"],
+    alpha=0.10,
+)
+
+# The decision boundary occurs at a class-1 probability of 0.5.
+ax.contour(
+    grid_x,
+    grid_y,
+    network_grid_probability,
+    levels=[0.5],
+    colors="black",
+    linewidths=2,
+)
+
+# Plot only the held-out test observations.
+for class_label, color, marker in class_styles:
+    is_class = test_labels == class_label
+    ax.scatter(
+        test_features[is_class, 0],
+        test_features[is_class, 1],
+        color=color,
+        marker=marker,
+        label=f"Class {class_label}",
+        s=55,
+        edgecolors="white",
+        linewidths=0.6,
+        zorder=3,
+    )
+
+# Circle any test observations that the network misclassifies.
+network_errors = network_test_labels != test_labels
+
+if network_errors.any():
+    ax.scatter(
+        test_features[network_errors, 0],
+        test_features[network_errors, 1],
+        facecolors="none",
+        edgecolors="black",
+        s=180,
+        linewidths=1.5,
+        label="Error",
+        zorder=4,
+    )
+
+ax.set_xlabel(r"Input 1: $x_{i1}$", fontsize=14)
+ax.set_ylabel(r"Input 2: $x_{i2}$", fontsize=14)
+ax.set_aspect("equal", adjustable="box")
+ax.tick_params(labelsize=12)
+ax.legend(frameon=False, loc="upper right", fontsize=11)
+ax.grid(alpha=0.15)
+
+fig.tight_layout()
+plt.show()
+```
+
+:::
+
+::: {.column width="34%"}
+
+**150 training observations; 50 test observations**
+
+**Accuracy** [@sklearn-metrics]:
+
+$$
+\text{Test accuracy}
+=
+\frac{\text{correct predictions}}{\text{test observations}}.
+$$
+
+```{python}
+#| label: two-moons-test-results
+#| echo: false
+#| output: asis
+
+print("| Model | Correct | Accuracy |")
+print("|:--|--:|--:|")
+
+for model_name, correct, accuracy in (
+    ("Straight line", linear_correct, linear_accuracy),
+    ("Network", network_correct, network_accuracy),
+):
+    print(
+        f"| {model_name} | {correct}/{test_count} "
+        f"| {accuracy:.0%} |"
+    )
+```
+
+**Black line:** $\hat{p}=0.5$.
+
+**Black rings:** prediction errors.
+
+:::
+
+::::
+
+**The nonlinear boundary improves accuracy on this test split.**
+
+## Limitations and takeaways {.smaller}
+
+:::: {.columns}
+
+::: {.column width="48%"}
+
+### Limitations
+
+- **Overfitting:** learning training noise can hurt predictions
+  on new data [@cs231n-architecture].
+
+- **Training choices:** initial weights and the learning rate
+  can affect the fitted model [@sklearn-nn].
+
+- **Limited evidence:** our result comes from one small synthetic
+  dataset and one train/test split.
+
+:::
+
+::: {.column width="48%"}
+
+### Three takeaways
+
+1. **Structure:** weighted sums, biases, and nonlinear hidden
+   activations create a flexible model.
+
+2. **Learning:** backpropagation computes gradients; the optimizer
+   updates parameters to reduce training loss.
+
+3. **Evaluation:** check predictions on held-out data
+   [@sklearn-evaluation]. Compare with a simpler baseline.
+
+:::
+
+::::
+
+## AI-use disclosure {.smaller}
+
+- **Tool:** OpenAI Codex.
+- **Assistance:** Refining wording, improving slide formatting, code
+  optimization, troubleshooting Quarto code and rendering issues, and
+  performing final sanity checks.
+- **Responsibility:** I take responsibility for the final content and
+  citations.
+
+
+## Concepts and training {.smaller}
+
+- **Overview:** IBM's explanation of neural networks [@ibm-nn].
+- **Neurons and activations:** Chapter 12 of
+  *Foundations of Computer Vision* [@visionbook].
+- **Learning:** gradient-based learning and backpropagation,
+  Chapters 10 and 14 [@visionbook].
+
+## Data, code, and evaluation {.smaller}
+
+- **Synthetic data:** generating the two-moons example
+  [@sklearn-data].
+- **Baseline:** logistic regression [@sklearn-linear].
+- **Neural network:** the multilayer perceptron and its Python API
+  [@sklearn-nn; @sklearn-mlp].
+- **Evaluation:** log loss, accuracy, and held-out evaluation
+  [@sklearn-metrics; @sklearn-evaluation].
+
+## Further readings {.smaller}
+
+- **Visual intuition:** 3Blue1Brown's neural-network lesson
+  [@sanderson-nn].
+- **Course context:** Chapter 10, Machine Learning, in the course notes
+  [@ids-book].
+- **Implementation details:** scikit-learn's neural-network guide
+  [@sklearn-nn].
+
+## References {.smaller .scrollable}
+
+::: {#refs}
+:::
